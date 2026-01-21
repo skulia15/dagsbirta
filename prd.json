@@ -104,7 +104,7 @@
       "id": "T09-1",
       "title": "Solar ROI: Create file and constants",
       "description": "Create src/lib/calculations/solar-roi.ts with SOLAR_CONSTANTS from constants.ts and default configuration",
-      "passes": false,
+      "passes": true,
       "acceptance": "File exists with proper imports, default values defined"
     },
     {
