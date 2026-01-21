@@ -13,7 +13,7 @@
       "id": "T17-2",
       "title": "Sun Path: Add polar coordinate system",
       "description": "Draw concentric circles for altitude (0°, 30°, 60°, 90°) and radial lines for cardinal directions (N, E, S, W)",
-      "passes": false,
+      "passes": true,
       "acceptance": "Circular diagram with grid, labeled cardinal directions"
     },
     {
