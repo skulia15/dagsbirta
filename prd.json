@@ -218,6 +218,27 @@
       "description": "npm run build succeeds, start dev server and test endpoint, git commit",
       "passes": true,
       "acceptance": "Build passes, endpoint responds correctly, commit 'feat: T10 - analysis API endpoint'"
+    },
+    {
+      "id": "T17-1",
+      "title": "Sun Path: Create component file and basic SVG structure",
+      "description": "Create src/components/visualizations/SunPathDiagram.tsx with basic SVG canvas and component structure",
+      "passes": true,
+      "acceptance": "File exists with SVG element, compiles without errors"
+    },
+    {
+      "id": "T17-2",
+      "title": "Sun Path: Add polar coordinate system",
+      "description": "Add altitude circles, cardinal direction lines, and labels to create polar grid",
+      "passes": true,
+      "acceptance": "Diagram shows concentric circles for altitude and N/E/S/W directions"
+    },
+    {
+      "id": "T17-3",
+      "title": "Sun Path: Implement coordinate conversion",
+      "description": "Helper function polarToCartesian(azimuth, altitude) converts sun position to SVG x,y coordinates",
+      "passes": true,
+      "acceptance": "Function correctly maps: azimuth 0°=top, 90°=right, altitude 0°=edge, 90°=center"
     }
   ]
 }

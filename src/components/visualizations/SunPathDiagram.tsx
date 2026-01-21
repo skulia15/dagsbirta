@@ -51,6 +51,36 @@ function azimuthToPoint(azimuth: number, radius: number): { x: number; y: number
 }
 
 /**
+ * Convert sun position (azimuth, altitude) to SVG (x, y) coordinates
+ *
+ * T17-3: Helper function for mapping sun positions to the polar diagram
+ *
+ * Coordinate mapping:
+ * - Azimuth 0° = top (North), 90° = right (East), 180° = bottom (South), 270° = left (West)
+ * - Altitude 0° = outer edge (horizon), 90° = center (zenith)
+ *
+ * @param azimuth - Compass bearing in degrees (0-360°, clockwise from North)
+ * @param altitude - Elevation angle in degrees (0° = horizon, 90° = zenith)
+ * @returns SVG coordinates {x, y} within the diagram
+ */
+export function polarToCartesian(
+  azimuth: number,
+  altitude: number
+): { x: number; y: number } {
+  // Convert altitude to radius: 0° → RADIUS (outer), 90° → 0 (center)
+  const radius = altitudeToRadius(altitude);
+
+  // Convert azimuth to angle, adjusted so 0° is at top (North)
+  // SVG angles: 0° is right (East), so subtract 90° to rotate North to top
+  const radians = ((azimuth - 90) * Math.PI) / 180;
+
+  return {
+    x: CENTER + radius * Math.cos(radians),
+    y: CENTER + radius * Math.sin(radians),
+  };
+}
+
+/**
  * Renders concentric circles for altitude angles
  */
 function AltitudeCircles() {
