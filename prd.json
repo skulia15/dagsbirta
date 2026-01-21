@@ -202,7 +202,7 @@
       "id": "T10-8",
       "title": "API: Add response metadata",
       "description": "Track processing time, add calculatedAt timestamp, tier indication",
-      "passes": false,
+      "passes": true,
       "acceptance": "Response includes meta object with timing and tier info"
     },
     {
