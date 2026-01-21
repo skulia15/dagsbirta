@@ -195,7 +195,7 @@
       "id": "T10-7",
       "title": "API: Implement tier logic",
       "description": "Free tier: today only, 10° horizon resolution, no annual/ROI. Paid: full access",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns partial data for free tier, full for paid"
     },
     {

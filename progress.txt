@@ -313,3 +313,13 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * Pattern: declare `solarROI: SolarROIResult | undefined`, assign conditionally
   * TypeScript handles undefined fields correctly - omitted from JSON response when undefined
   * getSolarROI accepts options object with systemSizeKW for customization
+
+### T10-7: API: Implement tier logic ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * Tier logic implemented via "effective" variables that respect tier restrictions
+  * Free tier restrictions: today only (effectiveDate), 10° horizon resolution (already existed), no annual/ROI (effectiveIncludeAnnual/effectiveIncludeSolarROI)
+  * Paid tier: full access to all features (custom dates, 1° resolution, annual, solar ROI)
+  * Response includes `meta.tierRestrictions` for free tier showing which features were restricted
+  * TypeScript tip: use nullish coalescing `?? false` for optional booleans in logical expressions
+  * Pattern: declare effective* variables early, use them throughout the function for consistency

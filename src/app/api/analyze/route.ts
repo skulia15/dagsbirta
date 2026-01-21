@@ -65,6 +65,12 @@ interface AnalyzeResponse {
     calculatedAt: string;
     processingTimeMs: number;
     tier: 'free' | 'paid';
+    tierRestrictions?: {
+      dateOverridden: boolean;
+      annualDisabled: boolean;
+      solarROIDisabled: boolean;
+      horizonResolution: number;
+    };
   };
 }
 
@@ -227,6 +233,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // Determine tier (default to 'free')
   const tier: 'free' | 'paid' = validatedRequest.tier ?? 'free';
 
+  // T10-7: Implement tier logic
+  // Free tier restrictions:
+  //   - Today only (no custom dates)
+  //   - 10° horizon resolution (vs 1° for paid)
+  //   - No annual/ROI calculations (forced to false)
+  // Paid tier: full access to all features
+
+  // For free tier, force date to today (ignore provided date)
+  const effectiveDate: Date = tier === 'free' ? new Date() : (
+    validatedRequest.date ? new Date(validatedRequest.date) : new Date()
+  );
+
+  // For free tier, force annual and ROI flags to false
+  const effectiveIncludeAnnual: boolean = tier === 'paid' && (validatedRequest.includeAnnual ?? false);
+  const effectiveIncludeSolarROI: boolean = tier === 'paid' && (validatedRequest.includeSolarROI ?? false);
+
   // T10-3: Calculate horizon profile
   let horizonProfile: HorizonProfile;
   try {
@@ -252,10 +274,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   // T10-4: Calculate sun path and daily sunlight
-  // Parse date from request (defaults to today)
-  const analysisDate = validatedRequest.date
-    ? new Date(validatedRequest.date)
-    : new Date();
+  // Use effectiveDate which respects tier restrictions
+  const analysisDate = effectiveDate;
 
   // Get sun path for the day
   const sunPath = getSunPath(
@@ -273,10 +293,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   );
 
   // T10-5: Add monthly/annual calculations if includeAnnual flag is set
+  // Note: Tier restrictions enforced via effectiveIncludeAnnual (free tier always false)
   let annualSunlight: AnnualSunlight | undefined;
   let irradiance: IrradianceResult | undefined;
 
-  if (validatedRequest.includeAnnual) {
+  if (effectiveIncludeAnnual) {
     // Get the year from the analysis date
     const year = analysisDate.getFullYear();
 
@@ -298,15 +319,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // T10-6: Add solar ROI calculations if includeSolarROI flag is set
   // Note: Solar ROI requires irradiance data, which requires includeAnnual to be true
+  // Note: Tier restrictions enforced via effectiveIncludeSolarROI (free tier always false)
   let solarROI: SolarROIResult | undefined;
 
-  if (validatedRequest.includeSolarROI && irradiance) {
+  if (effectiveIncludeSolarROI && irradiance) {
     solarROI = getSolarROI(irradiance, {
       systemSizeKW: validatedRequest.systemSizeKW,
     });
   }
 
   // Build response (further processing in T10-7 through T10-9)
+  // T10-7: Include tier restriction details for free tier
+  const tierRestrictions = tier === 'free' ? {
+    dateOverridden: validatedRequest.date !== undefined,  // true if user provided a date but it was ignored
+    annualDisabled: validatedRequest.includeAnnual === true,  // true if user requested annual but was denied
+    solarROIDisabled: validatedRequest.includeSolarROI === true,  // true if user requested ROI but was denied
+    horizonResolution: 10,  // free tier uses 10° resolution
+  } : undefined;
+
   const response: AnalyzeResponse = {
     location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
     horizonProfile,
@@ -319,6 +349,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       calculatedAt: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,
       tier,
+      tierRestrictions,
     },
   };
 
