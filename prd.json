@@ -111,7 +111,7 @@
       "id": "T09-2",
       "title": "Solar ROI: Calculate panel area and production",
       "description": "Helper to calculate panelAreaM2 from systemSizeKW and annual production from POA irradiance",
-      "passes": false,
+      "passes": true,
       "acceptance": "Formulas: panelArea = systemSizeKW / efficiency, production = POA × area × efficiency × (1-losses)"
     },
     {

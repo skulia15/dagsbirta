@@ -102,3 +102,84 @@ export interface SolarROIOptions {
   /** System lifetime years (default: 25) */
   systemLifeYears?: number;
 }
+
+/**
+ * Calculate the required panel area in square meters for a given system size.
+ *
+ * Formula: panelArea = systemSizeKW / efficiency
+ *
+ * Derivation: At peak irradiance (1 kW/m²), a panel with X% efficiency
+ * produces X kW per m². So to get Y kW capacity, you need Y/X m².
+ *
+ * @param systemSizeKW - System capacity in kilowatts
+ * @param panelEfficiency - Panel efficiency as decimal (0-1), e.g., 0.20 for 20%
+ * @returns Panel area in square meters
+ *
+ * @example
+ * // 5 kW system with 20% efficient panels
+ * calculatePanelArea(5, 0.20) // returns 25 m²
+ */
+export function calculatePanelArea(
+  systemSizeKW: number,
+  panelEfficiency: number = DEFAULT_SOLAR_CONFIG.panelEfficiency
+): number {
+  if (panelEfficiency <= 0 || panelEfficiency > 1) {
+    throw new Error('Panel efficiency must be between 0 and 1');
+  }
+  if (systemSizeKW <= 0) {
+    throw new Error('System size must be positive');
+  }
+
+  // panelArea = systemSizeKW / efficiency
+  // At 1 kW/m² peak irradiance, a 20% efficient panel produces 0.2 kW/m²
+  // So for 5 kW capacity: 5 / 0.20 = 25 m²
+  return systemSizeKW / panelEfficiency;
+}
+
+/**
+ * Calculate annual energy production in kWh from solar panels.
+ *
+ * Formula: production = POA × area × efficiency × (1 - losses)
+ *
+ * Where:
+ * - POA = Plane of Array irradiance (kWh/m²/year) - energy available on tilted panels
+ * - area = Panel area in m²
+ * - efficiency = Panel efficiency (0-1)
+ * - losses = System losses (0-1) - inverter, wiring, soiling, temperature effects
+ *
+ * @param annualPOA - Annual Plane of Array irradiance in kWh/m²/year
+ * @param panelAreaM2 - Total panel area in square meters
+ * @param panelEfficiency - Panel efficiency as decimal (0-1)
+ * @param systemLosses - System losses as decimal (0-1)
+ * @returns Annual production in kWh
+ *
+ * @example
+ * // 25 m² of panels, 1000 kWh/m²/year POA, 20% efficiency, 14% losses
+ * calculateAnnualProduction(1000, 25, 0.20, 0.14)
+ * // = 1000 × 25 × 0.20 × (1 - 0.14) = 4300 kWh
+ */
+export function calculateAnnualProduction(
+  annualPOA: number,
+  panelAreaM2: number,
+  panelEfficiency: number = DEFAULT_SOLAR_CONFIG.panelEfficiency,
+  systemLosses: number = DEFAULT_SOLAR_CONFIG.systemLosses
+): number {
+  if (annualPOA < 0) {
+    throw new Error('Annual POA cannot be negative');
+  }
+  if (panelAreaM2 <= 0) {
+    throw new Error('Panel area must be positive');
+  }
+  if (panelEfficiency <= 0 || panelEfficiency > 1) {
+    throw new Error('Panel efficiency must be between 0 and 1');
+  }
+  if (systemLosses < 0 || systemLosses >= 1) {
+    throw new Error('System losses must be between 0 and 1 (exclusive)');
+  }
+
+  // production = POA × area × efficiency × (1 - losses)
+  const production = annualPOA * panelAreaM2 * panelEfficiency * (1 - systemLosses);
+
+  // Round to 2 decimal places for clean output
+  return Math.round(production * 100) / 100;
+}
