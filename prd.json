@@ -76,7 +76,7 @@
       "id": "T08-4",
       "title": "Irradiance: Calculate optimal tilt angle",
       "description": "Determine optimal panel tilt for year-round production (latitude ± 5°)",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns optimal tilt ~60-65° for Iceland locations"
     },
     {
