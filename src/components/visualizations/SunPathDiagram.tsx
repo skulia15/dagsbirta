@@ -3,6 +3,8 @@
  *
  * T17-1: Basic component structure with SVG canvas
  * T17-2: Polar coordinate system with altitude circles and cardinal directions
+ * T17-3: polarToCartesian helper for sun position coordinate conversion
+ * T17-4: Sun path arc drawing using sunPath.positions data
  */
 
 import type { SunPath } from '../../types/index';
@@ -158,6 +160,56 @@ function CardinalLabels() {
   );
 }
 
+/**
+ * Renders the sun's path through the day as an SVG path
+ * T17-4: Plot sun's trajectory using sunPath.positions data
+ *
+ * @param sunPath - The sun path data containing positions array
+ */
+function SunPathArc({ sunPath }: { sunPath: SunPath }) {
+  // Filter to only include positions above the horizon (altitude > 0)
+  const visiblePositions = sunPath.positions.filter((pos) => pos.altitude > 0);
+
+  // Need at least 2 points to draw a path
+  if (visiblePositions.length < 2) {
+    return null;
+  }
+
+  // Build SVG path data string
+  // M = moveTo (start), L = lineTo (subsequent points)
+  const pathData = visiblePositions
+    .map((pos, index) => {
+      const { x, y } = polarToCartesian(pos.azimuth, pos.altitude);
+      // First point uses M (moveTo), rest use L (lineTo)
+      return index === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+    })
+    .join(' ');
+
+  return (
+    <g className="sun-path-arc">
+      {/* Sun path stroke - yellow/orange gradient effect with glow */}
+      <path
+        d={pathData}
+        fill="none"
+        stroke="#FFA500"
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.9}
+      />
+      {/* Inner brighter line for visual depth */}
+      <path
+        d={pathData}
+        fill="none"
+        stroke="#FFD700"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
 export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
   return (
     <svg
@@ -171,6 +223,9 @@ export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
       <AltitudeCircles />
       <CardinalLines />
       <CardinalLabels />
+
+      {/* Sun path arc - T17-4 */}
+      {sunPath && <SunPathArc sunPath={sunPath} />}
 
       {/* Center point marker (zenith) */}
       <circle cx={CENTER} cy={CENTER} r={3} fill="#666" />

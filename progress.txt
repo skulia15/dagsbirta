@@ -372,3 +372,52 @@ The `/api/analyze` endpoint orchestrates the entire sunlight analysis pipeline:
 - Response metadata (timing, tier info)
 - Error codes for debugging
 - Conditional calculation based on request parameters
+
+## Phase 2: Frontend Visualizations (T17-T19)
+Starting visualization components for sun path, horizon profile, and monthly charts.
+
+### T17-1: Sun Path: Create component file and basic SVG structure ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * Created new directory structure: src/components/visualizations/
+  * SVG viewBox="0 0 500 500" creates a scalable coordinate system
+  * Using type-only import from '../../types/index' for SunPath
+  * Props interface SunPathDiagramProps with optional sunPath allows rendering empty canvas
+  * Added ARIA attributes (role="img", aria-label) for accessibility
+  * Build warnings from tiles API are unrelated - new component compiles cleanly
+- Commit: 39787d0
+
+### T17-2: Sun Path: Add polar coordinate system ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * Polar coordinate diagrams: center = zenith (90° altitude), outer edge = horizon (0° altitude)
+  * SVG coordinate conversion: azimuth to x,y requires -90° rotation (azimuth 0° is North at top, not East)
+  * Helper function `altitudeToRadius(altitude)`: RADIUS * (1 - altitude / 90) maps 0°→edge, 90°→center
+  * Helper function `azimuthToPoint(azimuth, radius)`: converts polar to Cartesian with North-at-top convention
+  * SVG circles: `cx`, `cy` for center, `r` for radius; use strokeDasharray for dashed lines
+  * Cardinal directions: N=0°, E=90°, S=180°, W=270° (clockwise from North)
+  * Component decomposition: AltitudeCircles, CardinalLines, CardinalLabels as separate sub-components
+  * Altitude circles at 0°, 30°, 60° only (90° would be a point); outer circle (0°) has solid stroke
+- Commit: 4374e9d
+
+### T17-3: Sun Path: Implement coordinate conversion ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * `polarToCartesian(azimuth, altitude)` combines existing helpers into single-call sun position mapping
+  * Function is exported for use by parent components rendering sun positions
+  * Coordinate mapping verified: azimuth 0°→top (North), 90°→right (East), altitude 0°→edge, 90°→center
+  * Uses internal constants (CENTER=250, RADIUS=200) matching the SVG viewBox dimensions
+  * JSDoc documentation added for parameter meanings and return type
+  * The -90° rotation in radians calculation is key: SVG 0° is East, but sun diagrams use 0° as North
+- Commit: 4938ee0
+
+### T17-4: Sun Path: Draw sun path arc ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * `SunPathArc` component filters positions with altitude > 0 (above horizon only)
+  * SVG path uses M (moveTo) for first point, L (lineTo) for subsequent points
+  * Double-stroke technique: wider orange stroke (#FFA500) under thinner gold stroke (#FFD700) creates glow effect
+  * No SVG filters needed - simple layered strokes are more performant
+  * Component returns null for < 2 visible points (can't draw meaningful path)
+  * Conditional rendering in parent: `{sunPath && <SunPathArc sunPath={sunPath} />}`
+  * Path updates automatically when sunPath prop changes (React reactivity)

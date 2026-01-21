@@ -27,7 +27,7 @@
       "id": "T17-4",
       "title": "Sun Path: Draw sun path arc",
       "description": "Plot sun's trajectory through the day as an SVG path using sunPath.positions data",
-      "passes": false,
+      "passes": true,
       "acceptance": "Yellow/orange arc shows sun movement, updates with prop changes"
     },
     {
