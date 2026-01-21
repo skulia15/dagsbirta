@@ -52,3 +52,20 @@ Breaking into 30 small stories per prd.json for true iterative development
   * MONTH_NAMES constant array allows easy index-to-name mapping
   * Input validation (month 1-12) catches errors early
 - Commit: d7bd31e
+
+### T07-3: Monthly: Add sample day selection ✅
+- File: src/lib/calculations/monthly.ts
+- Learnings:
+  * Sample 4 days per month (1st, 8th, 15th, 22nd) balances accuracy vs performance
+  * JavaScript Date months are 0-indexed, so month-1 required when creating dates
+  * SAMPLE_DAYS as constant allows easy modification if more/fewer samples needed
+  * dailyResults array is computed but not yet used - will be averaged in T07-4
+- Commit: 6314061
+
+### T07-4: Monthly: Calculate monthly averages ✅
+- File: src/lib/calculations/monthly.ts
+- Learnings:
+  * Days in month trick: `new Date(year, month, 0).getDate()` returns last day of previous month
+  * Averaging both totalHours and theoreticalHours enables accurate reductionPercent
+  * Tested: Reykjavík June ~20h/day (600h total), December ~4h/day (117h total) - realistic
+  * Higher reductionPercent in winter (16%) vs summer (3.5%) due to lower sun angles

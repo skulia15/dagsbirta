@@ -57,14 +57,38 @@ export function getMonthlySunlight(
     getDailySunlight(lat, lng, date, horizonProfile)
   );
 
-  // Placeholder values - averaging will be implemented in T07-4
+  // Calculate average daily hours from sample days
+  const averageDailyHours = dailyResults.reduce(
+    (sum, result) => sum + result.totalHours,
+    0
+  ) / dailyResults.length;
+
+  // Calculate average theoretical daily hours
+  const averageTheoreticalDaily = dailyResults.reduce(
+    (sum, result) => sum + result.theoreticalHours,
+    0
+  ) / dailyResults.length;
+
+  // Get number of days in this month
+  // Trick: Day 0 of next month = last day of current month
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  // Calculate monthly totals
+  const totalHours = averageDailyHours * daysInMonth;
+  const theoreticalHours = averageTheoreticalDaily * daysInMonth;
+
+  // Calculate reduction percentage (terrain blocking)
+  const reductionPercent = theoreticalHours > 0
+    ? ((theoreticalHours - totalHours) / theoreticalHours) * 100
+    : 0;
+
   return {
     month,
     monthName,
     year,
-    averageDailyHours: 0,
-    totalHours: 0,
-    theoreticalHours: 0,
-    reductionPercent: 0
+    averageDailyHours,
+    totalHours,
+    theoreticalHours,
+    reductionPercent
   };
 }

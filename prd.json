@@ -34,7 +34,7 @@
       "id": "T07-4",
       "title": "Monthly: Calculate monthly averages",
       "description": "Average the 4 sample days, calculate totalHours = averageDailyHours * daysInMonth",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns correct averageDailyHours and totalHours for a test month"
     },
     {
