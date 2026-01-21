@@ -153,3 +153,14 @@ Breaking into 30 small stories per prd.json for true iterative development
   * All values rounded to 2 decimal places for consistent output
   * Build warnings from tiles API are unrelated - irradiance module compiles cleanly
 - Commit: cbf6819
+
+### T08-7: Irradiance: Test and commit ✅
+- File: scripts/test-irradiance.ts (test script)
+- Learnings:
+  * Created comprehensive test with synthetic annual sunlight data for Reykjavík
+  * Verified optimal tilt angles: Reykjavík 61.3°, Akureyri 62.6°, Ísafjörður 62.9° (all in 60-65° range)
+  * Validated GHI: 919 kWh/m²/year (within expected 700-1000 range for Iceland)
+  * POA shows 3.2% gain over GHI with optimal tilt - expected for tilted panels
+  * Extreme seasonal variation: June GHI 22x higher than December (189.76 vs 8.6 kWh/m²)
+  * T08 feature complete - irradiance calculator ready for Solar ROI integration
+- Commit: 4052c52

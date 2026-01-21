@@ -97,7 +97,7 @@
       "id": "T08-7",
       "title": "Irradiance: Test and commit",
       "description": "Test with sample data, verify realistic Iceland values, build succeeds, git commit",
-      "passes": false,
+      "passes": true,
       "acceptance": "Build passes, commit 'feat: T08 - irradiance calculator'"
     },
     {
