@@ -164,3 +164,53 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Extreme seasonal variation: June GHI 22x higher than December (189.76 vs 8.6 kWh/m²)
   * T08 feature complete - irradiance calculator ready for Solar ROI integration
 - Commit: 4052c52
+
+### T09-1: Solar ROI: Create file and constants ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * Scaffold story pattern: imports + types + constants setup for iterative development
+  * SOLAR_CONSTANTS imported from constants.ts provides financial parameters (efficiency, losses, prices)
+  * DEFAULT_SOLAR_CONFIG created with all default values for easy override via SolarROIOptions
+  * VIABILITY_THRESHOLDS defines payback year boundaries: excellent <10y, good 10-15y, marginal 15-20y, poor >20y
+  * SolarROIOptions interface allows customizing all financial parameters
+  * IrradianceResult and SolarROIResult types imported for future function signatures
+  * Build passes with no errors - ready for T09-2 (panel area and production calculations)
+- Commit: d6cb3c4
+
+### T09-2: Solar ROI: Calculate panel area and production ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * Panel area formula: `panelArea = systemSizeKW / efficiency` derives from 1 kW/m² peak irradiance
+  * At 20% efficiency, 5 kW capacity requires 25 m² of panels (5 / 0.20)
+  * Production formula: `POA × area × efficiency × (1-losses)` captures complete energy flow
+  * POA irradiance (kWh/m²/year) × area (m²) × efficiency (0-1) × (1-losses) = annual kWh
+  * Iceland 5kW system: 3440-4300 kWh/year production range (800-1000 POA, 20% eff, 14% loss)
+  * Input validation guards against zero/negative efficiency, losses ≥1, negative POA
+  * Both functions exported for use in T09-3 financial calculations and T09-6 main function
+- Commit: 6cc3d6f
+
+### T09-3: Solar ROI: Calculate financial metrics ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * Annual savings formula: `production × electricityPrice` - assumes 100% self-consumption
+  * Payback formula: `installationCost / annualSavings` - simple payback without discounting
+  * Iceland 5kW system: 7500 EUR cost, 735 EUR/year savings = 10.2 year payback (within 8-15 target)
+  * 25-year return uses exponential degradation: `year1 × (1 - 0.005)^(n-1)` per year
+  * After 25 years, panels still produce 88.67% of original output (0.5%/year degradation)
+  * Total 25-year production ~96,000 kWh vs ~102,000 without degradation (6% reduction)
+  * 25-year ROI: 130.9% return - investment more than doubles over lifetime
+  * Sensitivity: POA 750 → 12.9y payback, POA 1000 → 9.7y payback
+  * calculateInstallationCost helper added for cleaner code organization
+- Commit: e3a59a6
+
+### T09-4: Solar ROI: Monthly production breakdown ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * `calculateMonthlyProduction()` applies the same formula as annual production per-month
+  * Formula: `monthlyPOA × panelArea × efficiency × (1-losses)` - identical to annual formula
+  * Input validation: exactly 12 months required, panel area > 0, efficiency/losses in valid ranges
+  * Seasonal pattern emerges naturally from POA irradiance variation (not hardcoded)
+  * June production (841 kWh) vs December (26 kWh) shows ~32x difference for Iceland
+  * Total annual from monthly sum: 4492 kWh for 5kW system (within expected 3500-4500 range)
+  * Function returns `Array<{ month: number; kWh: number }>` matching SolarROIResult.monthlyProduction type
+- Commit: 52fd579

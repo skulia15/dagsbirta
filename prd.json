@@ -125,7 +125,7 @@
       "id": "T09-4",
       "title": "Solar ROI: Monthly production breakdown",
       "description": "Generate monthly production estimates based on monthly irradiance",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns 12 months of kWh production, follows seasonal pattern"
     },
     {

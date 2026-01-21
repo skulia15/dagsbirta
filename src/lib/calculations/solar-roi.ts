@@ -306,6 +306,59 @@ export function calculateInstallationCost(
  * // Total production: ~92,800 kWh (not 100,000 due to degradation)
  * // Total savings: ~16,700 EUR
  */
+/**
+ * Calculate monthly production breakdown from monthly irradiance data.
+ *
+ * Uses the same formula as annual production but applied per-month:
+ * monthlyProduction = monthlyPOA × panelArea × efficiency × (1 - losses)
+ *
+ * The seasonal pattern in production directly reflects the seasonal pattern
+ * in POA irradiance - summer months have high POA and high production,
+ * winter months have low POA and correspondingly low production.
+ *
+ * @param monthlyIrradiance - Array of monthly POA irradiance from IrradianceResult
+ * @param panelAreaM2 - Total panel area in square meters
+ * @param panelEfficiency - Panel efficiency as decimal (0-1)
+ * @param systemLosses - System losses as decimal (0-1)
+ * @returns Array of 12 monthly production values in kWh
+ *
+ * @example
+ * // With 25 m² panels, 20% efficiency, 14% losses
+ * calculateMonthlyProduction(monthlyIrradiance, 25, 0.20, 0.14)
+ * // Returns: [{month: 1, kWh: 45.2}, {month: 2, kWh: 112.4}, ...]
+ */
+export function calculateMonthlyProduction(
+  monthlyIrradiance: Array<{ month: number; ghi: number; poa: number }>,
+  panelAreaM2: number,
+  panelEfficiency: number = DEFAULT_SOLAR_CONFIG.panelEfficiency,
+  systemLosses: number = DEFAULT_SOLAR_CONFIG.systemLosses
+): Array<{ month: number; kWh: number }> {
+  if (!monthlyIrradiance || monthlyIrradiance.length !== 12) {
+    throw new Error('Monthly irradiance must contain exactly 12 months');
+  }
+  if (panelAreaM2 <= 0) {
+    throw new Error('Panel area must be positive');
+  }
+  if (panelEfficiency <= 0 || panelEfficiency > 1) {
+    throw new Error('Panel efficiency must be between 0 and 1');
+  }
+  if (systemLosses < 0 || systemLosses >= 1) {
+    throw new Error('System losses must be between 0 and 1 (exclusive)');
+  }
+
+  // Calculate production for each month using the same formula as annual:
+  // production = POA × area × efficiency × (1 - losses)
+  return monthlyIrradiance.map((monthData) => {
+    const monthlyProductionKWh =
+      monthData.poa * panelAreaM2 * panelEfficiency * (1 - systemLosses);
+
+    return {
+      month: monthData.month,
+      kWh: Math.round(monthlyProductionKWh * 100) / 100,
+    };
+  });
+}
+
 export function calculate25YearReturn(
   year1ProductionKWh: number,
   electricityPriceEUR: number = DEFAULT_SOLAR_CONFIG.electricityPriceEUR,
