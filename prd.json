@@ -167,7 +167,7 @@
       "id": "T10-3",
       "title": "API: Orchestrate horizon calculation",
       "description": "Call getHorizonProfile with request coordinates, handle errors",
-      "passes": false,
+      "passes": true,
       "acceptance": "Successfully computes horizon profile for valid Iceland coordinates"
     },
     {

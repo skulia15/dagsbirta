@@ -227,9 +227,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // Determine tier (default to 'free')
   const tier: 'free' | 'paid' = validatedRequest.tier ?? 'free';
 
-  // Build response (further processing in T10-3 through T10-9)
+  // T10-3: Calculate horizon profile
+  let horizonProfile: HorizonProfile;
+  try {
+    horizonProfile = await getHorizonProfile(
+      validatedRequest.lat,
+      validatedRequest.lng,
+      {
+        // For free tier, use lower resolution (10° instead of 1°)
+        // Full resolution will be implemented in T10-7 (tier logic)
+        angularResolution: tier === 'free' ? 10 : 1,
+      }
+    );
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json(
+      {
+        error: 'Failed to compute horizon profile',
+        details: errorMessage,
+      },
+      { status: 500, headers: CORS_HEADERS }
+    );
+  }
+
+  // Build response (further processing in T10-4 through T10-9)
   const response: AnalyzeResponse = {
     location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
+    horizonProfile,
     meta: {
       calculatedAt: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,
