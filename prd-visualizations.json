@@ -48,7 +48,7 @@
       "id": "T17-7",
       "title": "Sun Path: Highlight visible vs shadowed",
       "description": "Color-code sun path segments: bright where sun is visible, gray where blocked by terrain",
-      "passes": false,
+      "passes": true,
       "acceptance": "Path changes color where it crosses horizon line"
     },
     {

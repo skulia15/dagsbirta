@@ -7,13 +7,24 @@
  * T17-4: Sun path arc drawing using sunPath.positions data
  * T17-5: Markers for sunrise, solar noon, and sunset with time labels
  * T17-6: Horizon profile overlay showing terrain blocking
+ * T17-7: Color-coded segments - bright where sun visible, gray where blocked by terrain
  */
 
-import type { HorizonProfile, SunPath, SunPosition } from '../../types/index';
+import type { HorizonProfile, HorizonPoint, SunPath, SunPosition } from '../../types/index';
 
 export interface SunPathDiagramProps {
   sunPath?: SunPath;
   horizonProfile?: HorizonProfile;
+}
+
+/**
+ * T17-7: Segment visibility classification
+ * Each segment connects two consecutive sun positions and is marked as visible or shadowed
+ */
+interface PathSegment {
+  start: SunPosition;
+  end: SunPosition;
+  isVisible: boolean; // true = sun above terrain, false = blocked by terrain
 }
 
 const SVG_SIZE = 500;
@@ -83,6 +94,125 @@ export function polarToCartesian(
     x: CENTER + radius * Math.cos(radians),
     y: CENTER + radius * Math.sin(radians),
   };
+}
+
+/**
+ * T17-7: Get the horizon elevation at a specific azimuth by interpolating between profile points
+ * Uses linear interpolation between the two closest profile points
+ *
+ * @param azimuth - Compass bearing in degrees (0-360°)
+ * @param profile - Array of horizon points sorted by azimuth
+ * @returns Elevation angle in degrees at the given azimuth
+ */
+function getHorizonElevationAtAzimuth(azimuth: number, profile: HorizonPoint[]): number {
+  if (!profile || profile.length === 0) {
+    return 0; // No terrain data, assume flat horizon
+  }
+
+  // Normalize azimuth to 0-360 range
+  const normalizedAzimuth = ((azimuth % 360) + 360) % 360;
+
+  // Sort profile by azimuth for interpolation
+  const sortedProfile = [...profile].sort((a, b) => a.azimuth - b.azimuth);
+
+  // Find the two bracketing points
+  let lowerIndex = -1;
+  let upperIndex = -1;
+
+  for (let i = 0; i < sortedProfile.length; i++) {
+    if (sortedProfile[i].azimuth <= normalizedAzimuth) {
+      lowerIndex = i;
+    }
+    if (sortedProfile[i].azimuth >= normalizedAzimuth && upperIndex === -1) {
+      upperIndex = i;
+    }
+  }
+
+  // Handle edge cases (azimuth before first point or after last point)
+  if (lowerIndex === -1) {
+    // Azimuth is before the first point, wrap around from the last point
+    lowerIndex = sortedProfile.length - 1;
+  }
+  if (upperIndex === -1) {
+    // Azimuth is after the last point, wrap around to the first point
+    upperIndex = 0;
+  }
+
+  const lower = sortedProfile[lowerIndex];
+  const upper = sortedProfile[upperIndex];
+
+  // Exact match
+  if (lower.azimuth === normalizedAzimuth) {
+    return lower.elevationAngle;
+  }
+  if (upper.azimuth === normalizedAzimuth) {
+    return upper.elevationAngle;
+  }
+
+  // Same point (single-point profile or exact match)
+  if (lowerIndex === upperIndex) {
+    return lower.elevationAngle;
+  }
+
+  // Linear interpolation between the two points
+  // Handle wraparound case (e.g., lower at 350°, upper at 10°)
+  let azimuthRange = upper.azimuth - lower.azimuth;
+  let azimuthOffset = normalizedAzimuth - lower.azimuth;
+
+  if (azimuthRange < 0) {
+    // Wraparound case
+    azimuthRange += 360;
+  }
+  if (azimuthOffset < 0) {
+    azimuthOffset += 360;
+  }
+
+  const t = azimuthOffset / azimuthRange;
+  return lower.elevationAngle + t * (upper.elevationAngle - lower.elevationAngle);
+}
+
+/**
+ * T17-7: Classify sun path segments as visible or shadowed
+ * Compares sun altitude against terrain horizon at each position
+ *
+ * @param sunPath - The sun's path through the day
+ * @param horizonProfile - The terrain horizon profile
+ * @returns Array of path segments with visibility classification
+ */
+function classifyPathSegments(
+  sunPath: SunPath,
+  horizonProfile: HorizonProfile | undefined
+): PathSegment[] {
+  const { positions } = sunPath;
+  const segments: PathSegment[] = [];
+
+  // Filter to positions above geometric horizon (altitude > 0)
+  const aboveHorizon = positions.filter(pos => pos.altitude > 0);
+
+  if (aboveHorizon.length < 2) {
+    return segments;
+  }
+
+  for (let i = 0; i < aboveHorizon.length - 1; i++) {
+    const start = aboveHorizon[i];
+    const end = aboveHorizon[i + 1];
+
+    // Determine visibility at the midpoint of the segment
+    const midAzimuth = (start.azimuth + end.azimuth) / 2;
+    const midAltitude = (start.altitude + end.altitude) / 2;
+
+    // Get terrain horizon elevation at this azimuth
+    const horizonElevation = horizonProfile
+      ? getHorizonElevationAtAzimuth(midAzimuth, horizonProfile.profile)
+      : 0;
+
+    // Sun is visible if its altitude is above the terrain horizon
+    const isVisible = midAltitude > horizonElevation;
+
+    segments.push({ start, end, isVisible });
+  }
+
+  return segments;
 }
 
 /**
@@ -248,49 +378,106 @@ function HorizonOverlay({ horizonProfile }: { horizonProfile: HorizonProfile }) 
 /**
  * Renders the sun's path through the day as an SVG path
  * T17-4: Plot sun's trajectory using sunPath.positions data
+ * T17-7: Color-coded segments - bright where visible, gray where blocked
  *
  * @param sunPath - The sun path data containing positions array
+ * @param horizonProfile - Optional terrain horizon profile for visibility classification
  */
-function SunPathArc({ sunPath }: { sunPath: SunPath }) {
-  // Filter to only include positions above the horizon (altitude > 0)
-  const visiblePositions = sunPath.positions.filter((pos) => pos.altitude > 0);
+function SunPathArc({
+  sunPath,
+  horizonProfile,
+}: {
+  sunPath: SunPath;
+  horizonProfile?: HorizonProfile;
+}) {
+  // Classify segments as visible or shadowed based on terrain
+  const segments = classifyPathSegments(sunPath, horizonProfile);
 
-  // Need at least 2 points to draw a path
-  if (visiblePositions.length < 2) {
+  if (segments.length === 0) {
     return null;
   }
 
-  // Build SVG path data string
-  // M = moveTo (start), L = lineTo (subsequent points)
-  const pathData = visiblePositions
-    .map((pos, index) => {
-      const { x, y } = polarToCartesian(pos.azimuth, pos.altitude);
-      // First point uses M (moveTo), rest use L (lineTo)
-      return index === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
-    })
-    .join(' ');
+  // Group consecutive segments with the same visibility into paths
+  // This reduces the number of SVG elements and creates smoother paths
+  const groupedPaths: Array<{
+    isVisible: boolean;
+    pathData: string;
+  }> = [];
+
+  let currentGroup: {
+    isVisible: boolean;
+    positions: Array<{ x: number; y: number }>;
+  } | null = null;
+
+  for (const segment of segments) {
+    const startCoord = polarToCartesian(segment.start.azimuth, segment.start.altitude);
+    const endCoord = polarToCartesian(segment.end.azimuth, segment.end.altitude);
+
+    if (currentGroup === null || currentGroup.isVisible !== segment.isVisible) {
+      // Start a new group
+      if (currentGroup !== null) {
+        // Finalize the previous group
+        const pathData = currentGroup.positions
+          .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+          .join(' ');
+        groupedPaths.push({ isVisible: currentGroup.isVisible, pathData });
+      }
+      currentGroup = {
+        isVisible: segment.isVisible,
+        positions: [startCoord, endCoord],
+      };
+    } else {
+      // Continue the current group (add only the end point since start overlaps)
+      currentGroup.positions.push(endCoord);
+    }
+  }
+
+  // Finalize the last group
+  if (currentGroup !== null) {
+    const pathData = currentGroup.positions
+      .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+      .join(' ');
+    groupedPaths.push({ isVisible: currentGroup.isVisible, pathData });
+  }
+
+  // Colors for visible (bright) and shadowed (gray) segments
+  const VISIBLE_OUTER = '#FFA500'; // Orange
+  const VISIBLE_INNER = '#FFD700'; // Gold
+  const SHADOW_OUTER = '#888888'; // Gray
+  const SHADOW_INNER = '#AAAAAA'; // Lighter gray
 
   return (
     <g className="sun-path-arc">
-      {/* Sun path stroke - yellow/orange gradient effect with glow */}
-      <path
-        d={pathData}
-        fill="none"
-        stroke="#FFA500"
-        strokeWidth={4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.9}
-      />
-      {/* Inner brighter line for visual depth */}
-      <path
-        d={pathData}
-        fill="none"
-        stroke="#FFD700"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {groupedPaths.map((group, index) => {
+        const outerColor = group.isVisible ? VISIBLE_OUTER : SHADOW_OUTER;
+        const innerColor = group.isVisible ? VISIBLE_INNER : SHADOW_INNER;
+        const opacity = group.isVisible ? 0.9 : 0.6;
+
+        return (
+          <g key={index} className={`path-segment-${group.isVisible ? 'visible' : 'shadowed'}`}>
+            {/* Outer stroke */}
+            <path
+              d={group.pathData}
+              fill="none"
+              stroke={outerColor}
+              strokeWidth={4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={opacity}
+            />
+            {/* Inner brighter line for visual depth */}
+            <path
+              d={group.pathData}
+              fill="none"
+              stroke={innerColor}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={opacity}
+            />
+          </g>
+        );
+      })}
     </g>
   );
 }
@@ -456,8 +643,8 @@ export function SunPathDiagram({ sunPath, horizonProfile }: SunPathDiagramProps)
       {/* Horizon profile overlay - T17-6: shows terrain blocking */}
       {horizonProfile && <HorizonOverlay horizonProfile={horizonProfile} />}
 
-      {/* Sun path arc - T17-4 */}
-      {sunPath && <SunPathArc sunPath={sunPath} />}
+      {/* Sun path arc - T17-4, T17-7: color-coded by visibility */}
+      {sunPath && <SunPathArc sunPath={sunPath} horizonProfile={horizonProfile} />}
 
       {/* Sunrise, noon, sunset markers - T17-5 */}
       {sunPath && <SunMarkers sunPath={sunPath} />}

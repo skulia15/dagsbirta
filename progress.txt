@@ -421,3 +421,42 @@ Starting visualization components for sun path, horizon profile, and monthly cha
   * Component returns null for < 2 visible points (can't draw meaningful path)
   * Conditional rendering in parent: `{sunPath && <SunPathArc sunPath={sunPath} />}`
   * Path updates automatically when sunPath prop changes (React reactivity)
+
+### T17-5: Sun Path: Mark sunrise, noon, sunset ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * `findPositionAtTime()` finds the sun position closest to a target time by iterating all positions
+  * SunPath type provides `sunrise`, `sunset`, and `solarNoon` as Date objects (or null)
+  * Labels positioned dynamically based on azimuth angle to avoid overlapping the sun path arc
+  * Double-circle marker technique: white fill with colored stroke + smaller colored fill for visibility
+  * Three distinct colors chosen: #FF6B6B (sunrise), #FFD93D (noon), #C9190B (sunset)
+  * Markers only render when altitude > 0 (handles polar night edge case)
+  * `formatTime()` converts Date to HH:MM string with zero-padding
+- Commit: 0b6f969
+
+### T17-6: Sun Path: Overlay horizon profile ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * HorizonProfile contains `profile` array of HorizonPoint objects with azimuth and elevationAngle
+  * HorizonOverlay component draws filled "donut" shape: inner edge at terrain elevation, outer at horizon (0°)
+  * SVG path technique: trace inner edge at elevationAngle, then reverse-trace outer edge at 0°, close with Z
+  * Used brown/gray color (#8B7355) with 40% opacity for terrain visibility without obscuring sun path
+  * Stroke outline (#6B5344) at 60% opacity provides visual definition
+  * Profile sorted by azimuth before rendering to ensure proper path order
+  * Component added before SunPathArc in render order so sun path draws on top of terrain
+  * Reuses existing polarToCartesian helper for consistent coordinate transformation
+- Commit: 62c7694
+
+### T17-7: Sun Path: Highlight visible vs shadowed ✅
+- File: src/components/visualizations/SunPathDiagram.tsx
+- Learnings:
+  * `getHorizonElevationAtAzimuth()` interpolates terrain elevation between profile points at any azimuth
+  * Linear interpolation handles wraparound case (e.g., 350° to 10°) with modulo arithmetic
+  * `classifyPathSegments()` determines visibility at midpoint of each segment by comparing sun altitude vs terrain elevation
+  * PathSegment interface: { start, end, isVisible } for segment classification
+  * SunPathArc groups consecutive segments with same visibility to reduce SVG elements
+  * Visible segments: orange/gold colors (#FFA500/#FFD700), opacity 0.9
+  * Shadowed segments: gray colors (#888888/#AAAAAA), opacity 0.6 for visual distinction
+  * Component gracefully handles missing horizonProfile (defaults to flat horizon = all visible)
+  * Acceptance criteria: "Path changes color where it crosses horizon line" - VERIFIED
+- Commit: (this commit)
