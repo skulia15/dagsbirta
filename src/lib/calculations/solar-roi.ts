@@ -359,6 +359,61 @@ export function calculateMonthlyProduction(
   });
 }
 
+/**
+ * Assess the viability of a solar installation based on payback period.
+ *
+ * Rating logic (from acceptance criteria):
+ * - excellent: payback < 10 years
+ * - good: payback 10-15 years
+ * - marginal: payback 15-20 years
+ * - poor: payback > 20 years
+ *
+ * isViable is true for excellent, good, and marginal ratings (payback ≤ 20 years).
+ * A 20+ year payback exceeds typical panel warranty periods, making it poor investment.
+ *
+ * @param paybackYears - Payback period in years
+ * @returns Object with isViable boolean and viabilityRating string
+ *
+ * @example
+ * assessViability(8)   // { isViable: true, viabilityRating: 'excellent' }
+ * assessViability(12)  // { isViable: true, viabilityRating: 'good' }
+ * assessViability(18)  // { isViable: true, viabilityRating: 'marginal' }
+ * assessViability(25)  // { isViable: false, viabilityRating: 'poor' }
+ */
+export function assessViability(paybackYears: number): {
+  isViable: boolean;
+  viabilityRating: 'excellent' | 'good' | 'marginal' | 'poor';
+} {
+  if (paybackYears < 0) {
+    throw new Error('Payback years cannot be negative');
+  }
+
+  let viabilityRating: 'excellent' | 'good' | 'marginal' | 'poor';
+
+  if (paybackYears < VIABILITY_THRESHOLDS.excellent) {
+    // Payback < 10 years = excellent
+    viabilityRating = 'excellent';
+  } else if (paybackYears < VIABILITY_THRESHOLDS.good) {
+    // Payback 10-15 years = good
+    viabilityRating = 'good';
+  } else if (paybackYears < VIABILITY_THRESHOLDS.marginal) {
+    // Payback 15-20 years = marginal
+    viabilityRating = 'marginal';
+  } else {
+    // Payback >= 20 years = poor
+    viabilityRating = 'poor';
+  }
+
+  // isViable is true for anything that pays back within the marginal threshold
+  // Poor (>20 years) exceeds typical 25-year panel warranty - not a good investment
+  const isViable = viabilityRating !== 'poor';
+
+  return {
+    isViable,
+    viabilityRating,
+  };
+}
+
 export function calculate25YearReturn(
   year1ProductionKWh: number,
   electricityPriceEUR: number = DEFAULT_SOLAR_CONFIG.electricityPriceEUR,

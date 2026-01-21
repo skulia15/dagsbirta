@@ -132,7 +132,7 @@
       "id": "T09-5",
       "title": "Solar ROI: Viability assessment",
       "description": "Determine isViable flag and viabilityRating (excellent/good/marginal/poor) based on payback years",
-      "passes": false,
+      "passes": true,
       "acceptance": "Rating logic: excellent <10y, good 10-15y, marginal 15-20y, poor >20y"
     },
     {
