@@ -209,7 +209,7 @@
       "id": "T10-9",
       "title": "API: Error handling and testing",
       "description": "Proper error responses, test with curl/Postman, verify response format",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns proper HTTP codes, JSON format correct"
     },
     {

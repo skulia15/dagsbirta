@@ -323,3 +323,26 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * Response includes `meta.tierRestrictions` for free tier showing which features were restricted
   * TypeScript tip: use nullish coalescing `?? false` for optional booleans in logical expressions
   * Pattern: declare effective* variables early, use them throughout the function for consistency
+
+### T10-8: API: Add response metadata ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * Metadata was already implemented during T10-7's tier logic work
+  * Response includes `meta` object with: calculatedAt (ISO timestamp), processingTimeMs, tier, tierRestrictions
+  * Pattern: capture `startTime = Date.now()` at beginning of handler, compute `processingTimeMs = Date.now() - startTime` at end
+  * AnalyzeResponse interface defines the meta object structure with required and optional fields
+  * TypeScript interfaces ensure response shape is consistent and well-documented
+  * tierRestrictions is only included for free tier (undefined for paid tier, omitted from JSON)
+- Commit: 3acb543
+
+### T10-9: API: Error handling and testing ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * Created `ErrorResponse` interface for consistent error structure: `{error, code, details?}`
+  * `createErrorResponse()` helper function standardizes error response creation
+  * Error codes added: INVALID_JSON, INVALID_BODY, INVALID_COORDINATES, LOCATION_NOT_FOUND, INVALID_DATE, INVALID_SYSTEM_SIZE, HORIZON_CALCULATION_ERROR, INTERNAL_ERROR
+  * HTTP status codes: 400 for client errors, 404 for location outside Iceland, 500 for server errors
+  * Added validation for `systemSizeKW` (must be > 0 and <= 100)
+  * Top-level try/catch wraps all calculation logic to catch unexpected errors
+  * Tested with curl: all 6 error scenarios return proper HTTP codes and JSON format
+  * Successful requests return 200 with full response structure including meta object

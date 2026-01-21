@@ -74,6 +74,29 @@ interface AnalyzeResponse {
   };
 }
 
+// Standard error response interface
+interface ErrorResponse {
+  error: string;
+  code: string;
+  details?: unknown;
+}
+
+/**
+ * Create a standardized error response
+ */
+function createErrorResponse(
+  error: string,
+  code: string,
+  status: number,
+  details?: unknown
+): NextResponse<ErrorResponse> {
+  const body: ErrorResponse = { error, code };
+  if (details !== undefined) {
+    body.details = details;
+  }
+  return NextResponse.json(body, { status, headers: CORS_HEADERS });
+}
+
 // CORS headers
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -169,17 +192,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON in request body' },
-      { status: 400, headers: CORS_HEADERS }
+    return createErrorResponse(
+      'Invalid JSON in request body',
+      'INVALID_JSON',
+      400
     );
   }
 
   // Type guard for body
   if (!body || typeof body !== 'object') {
-    return NextResponse.json(
-      { error: 'Request body must be an object' },
-      { status: 400, headers: CORS_HEADERS }
+    return createErrorResponse(
+      'Request body must be an object',
+      'INVALID_BODY',
+      400
     );
   }
 
@@ -188,9 +213,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // Validate coordinates are valid numbers
   const coordError = validateCoordinates(requestBody.lat, requestBody.lng);
   if (coordError) {
-    return NextResponse.json(
-      { error: coordError },
-      { status: 400, headers: CORS_HEADERS }
+    return createErrorResponse(
+      coordError,
+      'INVALID_COORDINATES',
+      400
     );
   }
 
@@ -199,23 +225,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Validate coordinates are within Iceland (404 for valid coords outside Iceland)
   if (!isWithinIceland(lat, lng)) {
-    return NextResponse.json(
+    return createErrorResponse(
+      'Location is outside Iceland',
+      'LOCATION_NOT_FOUND',
+      404,
       {
-        error: 'Location is outside Iceland',
         bounds: ICELAND_BOUNDS,
         provided: { lat, lng },
-      },
-      { status: 404, headers: CORS_HEADERS }
+      }
     );
   }
 
   // Validate date if provided
   const dateError = validateDateString(requestBody.date);
   if (dateError) {
-    return NextResponse.json(
-      { error: dateError },
-      { status: 400, headers: CORS_HEADERS }
+    return createErrorResponse(
+      dateError,
+      'INVALID_DATE',
+      400
     );
+  }
+
+  // Validate systemSizeKW if provided
+  if (requestBody.systemSizeKW !== undefined) {
+    if (!isValidNumber(requestBody.systemSizeKW)) {
+      return createErrorResponse(
+        'systemSizeKW must be a valid number',
+        'INVALID_SYSTEM_SIZE',
+        400
+      );
+    }
+    if (requestBody.systemSizeKW <= 0 || requestBody.systemSizeKW > 100) {
+      return createErrorResponse(
+        'systemSizeKW must be between 0 and 100',
+        'INVALID_SYSTEM_SIZE',
+        400,
+        { provided: requestBody.systemSizeKW, valid_range: '0 < systemSizeKW <= 100' }
+      );
+    }
   }
 
   // Parse validated request
@@ -249,112 +296,124 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const effectiveIncludeAnnual: boolean = tier === 'paid' && (validatedRequest.includeAnnual ?? false);
   const effectiveIncludeSolarROI: boolean = tier === 'paid' && (validatedRequest.includeSolarROI ?? false);
 
-  // T10-3: Calculate horizon profile
-  let horizonProfile: HorizonProfile;
+  // Wrap calculations in try/catch for unexpected errors
   try {
-    horizonProfile = await getHorizonProfile(
+    // T10-3: Calculate horizon profile
+    let horizonProfile: HorizonProfile;
+    try {
+      horizonProfile = await getHorizonProfile(
+        validatedRequest.lat,
+        validatedRequest.lng,
+        {
+          // For free tier, use lower resolution (10° instead of 1°)
+          // Full resolution will be implemented in T10-7 (tier logic)
+          angularResolution: tier === 'free' ? 10 : 1,
+        }
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      return createErrorResponse(
+        'Failed to compute horizon profile',
+        'HORIZON_CALCULATION_ERROR',
+        500,
+        errorMessage
+      );
+    }
+
+    // T10-4: Calculate sun path and daily sunlight
+    // Use effectiveDate which respects tier restrictions
+    const analysisDate = effectiveDate;
+
+    // Get sun path for the day
+    const sunPath = getSunPath(
       validatedRequest.lat,
       validatedRequest.lng,
-      {
-        // For free tier, use lower resolution (10° instead of 1°)
-        // Full resolution will be implemented in T10-7 (tier logic)
-        angularResolution: tier === 'free' ? 10 : 1,
-      }
+      analysisDate
     );
+
+    // Calculate daily sunlight accounting for terrain
+    const dailySunlight = getDailySunlight(
+      validatedRequest.lat,
+      validatedRequest.lng,
+      analysisDate,
+      horizonProfile
+    );
+
+    // T10-5: Add monthly/annual calculations if includeAnnual flag is set
+    // Note: Tier restrictions enforced via effectiveIncludeAnnual (free tier always false)
+    let annualSunlight: AnnualSunlight | undefined;
+    let irradiance: IrradianceResult | undefined;
+
+    if (effectiveIncludeAnnual) {
+      // Get the year from the analysis date
+      const year = analysisDate.getFullYear();
+
+      // Calculate annual sunlight (aggregates monthly data)
+      annualSunlight = getAnnualSunlight(
+        validatedRequest.lat,
+        validatedRequest.lng,
+        horizonProfile,
+        year
+      );
+
+      // Calculate irradiance from annual sunlight data
+      irradiance = getIrradiance(
+        validatedRequest.lat,
+        validatedRequest.lng,
+        annualSunlight
+      );
+    }
+
+    // T10-6: Add solar ROI calculations if includeSolarROI flag is set
+    // Note: Solar ROI requires irradiance data, which requires includeAnnual to be true
+    // Note: Tier restrictions enforced via effectiveIncludeSolarROI (free tier always false)
+    let solarROI: SolarROIResult | undefined;
+
+    if (effectiveIncludeSolarROI && irradiance) {
+      solarROI = getSolarROI(irradiance, {
+        systemSizeKW: validatedRequest.systemSizeKW,
+      });
+    }
+
+    // Build response (further processing in T10-7 through T10-9)
+    // T10-7: Include tier restriction details for free tier
+    const tierRestrictions = tier === 'free' ? {
+      dateOverridden: validatedRequest.date !== undefined,  // true if user provided a date but it was ignored
+      annualDisabled: validatedRequest.includeAnnual === true,  // true if user requested annual but was denied
+      solarROIDisabled: validatedRequest.includeSolarROI === true,  // true if user requested ROI but was denied
+      horizonResolution: 10,  // free tier uses 10° resolution
+    } : undefined;
+
+    const response: AnalyzeResponse = {
+      location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
+      horizonProfile,
+      sunPath,
+      dailySunlight,
+      annualSunlight,
+      irradiance,
+      solarROI,
+      meta: {
+        calculatedAt: new Date().toISOString(),
+        processingTimeMs: Date.now() - startTime,
+        tier,
+        tierRestrictions,
+      },
+    };
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: CORS_HEADERS,
+    });
   } catch (error) {
+    // Catch any unexpected errors during calculation
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      {
-        error: 'Failed to compute horizon profile',
-        details: errorMessage,
-      },
-      { status: 500, headers: CORS_HEADERS }
+    return createErrorResponse(
+      'Internal server error during analysis',
+      'INTERNAL_ERROR',
+      500,
+      errorMessage
     );
   }
-
-  // T10-4: Calculate sun path and daily sunlight
-  // Use effectiveDate which respects tier restrictions
-  const analysisDate = effectiveDate;
-
-  // Get sun path for the day
-  const sunPath = getSunPath(
-    validatedRequest.lat,
-    validatedRequest.lng,
-    analysisDate
-  );
-
-  // Calculate daily sunlight accounting for terrain
-  const dailySunlight = getDailySunlight(
-    validatedRequest.lat,
-    validatedRequest.lng,
-    analysisDate,
-    horizonProfile
-  );
-
-  // T10-5: Add monthly/annual calculations if includeAnnual flag is set
-  // Note: Tier restrictions enforced via effectiveIncludeAnnual (free tier always false)
-  let annualSunlight: AnnualSunlight | undefined;
-  let irradiance: IrradianceResult | undefined;
-
-  if (effectiveIncludeAnnual) {
-    // Get the year from the analysis date
-    const year = analysisDate.getFullYear();
-
-    // Calculate annual sunlight (aggregates monthly data)
-    annualSunlight = getAnnualSunlight(
-      validatedRequest.lat,
-      validatedRequest.lng,
-      horizonProfile,
-      year
-    );
-
-    // Calculate irradiance from annual sunlight data
-    irradiance = getIrradiance(
-      validatedRequest.lat,
-      validatedRequest.lng,
-      annualSunlight
-    );
-  }
-
-  // T10-6: Add solar ROI calculations if includeSolarROI flag is set
-  // Note: Solar ROI requires irradiance data, which requires includeAnnual to be true
-  // Note: Tier restrictions enforced via effectiveIncludeSolarROI (free tier always false)
-  let solarROI: SolarROIResult | undefined;
-
-  if (effectiveIncludeSolarROI && irradiance) {
-    solarROI = getSolarROI(irradiance, {
-      systemSizeKW: validatedRequest.systemSizeKW,
-    });
-  }
-
-  // Build response (further processing in T10-7 through T10-9)
-  // T10-7: Include tier restriction details for free tier
-  const tierRestrictions = tier === 'free' ? {
-    dateOverridden: validatedRequest.date !== undefined,  // true if user provided a date but it was ignored
-    annualDisabled: validatedRequest.includeAnnual === true,  // true if user requested annual but was denied
-    solarROIDisabled: validatedRequest.includeSolarROI === true,  // true if user requested ROI but was denied
-    horizonResolution: 10,  // free tier uses 10° resolution
-  } : undefined;
-
-  const response: AnalyzeResponse = {
-    location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
-    horizonProfile,
-    sunPath,
-    dailySunlight,
-    annualSunlight,
-    irradiance,
-    solarROI,
-    meta: {
-      calculatedAt: new Date().toISOString(),
-      processingTimeMs: Date.now() - startTime,
-      tier,
-      tierRestrictions,
-    },
-  };
-
-  return NextResponse.json(response, {
-    status: 200,
-    headers: CORS_HEADERS,
-  });
 }
