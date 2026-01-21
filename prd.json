@@ -55,7 +55,7 @@
       "id": "T08-1",
       "title": "Irradiance: Create file and imports",
       "description": "Create src/lib/calculations/irradiance.ts with type imports and constants from src/lib/constants.ts",
-      "passes": false,
+      "passes": true,
       "acceptance": "File exists with IrradianceResult type imported, compiles"
     },
     {
