@@ -83,7 +83,7 @@
       "id": "T08-5",
       "title": "Irradiance: Implement monthly irradiance breakdown",
       "description": "Calculate monthly GHI and POA values, accounting for seasonal variation",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns 12 months of irradiance data, summer > winter"
     },
     {

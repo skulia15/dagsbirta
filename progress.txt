@@ -130,3 +130,14 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Used latitude-based formula with 2-4° offset: `optimalTilt = latitude - (2 + (latitude - 60) * 0.2)`
   * Results: Reykjavík (64.1°N) → 61.3°, Akureyri (65.7°N) → 62.5°, Höfn (64.3°N) → 61.4°
   * Function exported for use in T08-6's main getIrradiance function
+
+### T08-5: Irradiance: Implement monthly irradiance breakdown ✅
+- File: src/lib/calculations/irradiance.ts
+- Learnings:
+  * `calculateMonthlyIrradiance()` combines existing `calculateMonthlyGHI()` and `calculatePOA()` helpers
+  * Function returns array of {month, ghi, poa} matching IrradianceResult.monthlyIrradiance type
+  * Reuses calculateOptimalTilt if no tilt angle provided (sensible default)
+  * Seasonal variation already handled by calculateMonthlyGHI's sinusoidal model
+  * Test results: June GHI=189.76 vs December GHI=7.88 (24x ratio!) - summer >> winter confirmed
+  * Annual totals: GHI=964.5, POA=995.1 kWh/m² (reasonable for Iceland)
+  * Values rounded to 2 decimal places for clean output

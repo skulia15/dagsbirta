@@ -198,3 +198,46 @@ export function calculateMonthlyGHI(annualSunlight: AnnualSunlight): number[] {
     return monthlyGHI;
   });
 }
+
+/**
+ * Calculate monthly irradiance breakdown with both GHI and POA values.
+ *
+ * This function produces the full monthly irradiance data required by
+ * IrradianceResult.monthlyIrradiance. It calculates both horizontal (GHI)
+ * and tilted panel (POA) irradiance for each month.
+ *
+ * Key characteristics:
+ * - Summer months have significantly higher irradiance (due to more sunlight hours
+ *   and higher sun angles)
+ * - Winter months have lower irradiance (but POA still provides gain over GHI
+ *   due to optimal tilt capturing available sun better)
+ * - POA values are always >= GHI values when tilt is optimal
+ *
+ * @param annualSunlight - Annual sunlight data with monthly breakdown
+ * @param latitude - Location latitude in degrees (for POA calculation)
+ * @param tiltAngle - Panel tilt angle in degrees (or uses optimal if not provided)
+ * @returns Array of 12 monthly irradiance objects with month, ghi, and poa
+ */
+export function calculateMonthlyIrradiance(
+  annualSunlight: AnnualSunlight,
+  latitude: number,
+  tiltAngle?: number
+): Array<{ month: number; ghi: number; poa: number }> {
+  // Use provided tilt or calculate optimal for this latitude
+  const effectiveTilt = tiltAngle ?? calculateOptimalTilt(latitude);
+
+  // Get monthly GHI values
+  const monthlyGHI = calculateMonthlyGHI(annualSunlight);
+
+  // Calculate POA for each month
+  return annualSunlight.months.map((month, index) => {
+    const ghi = monthlyGHI[index];
+    const poa = calculatePOA(ghi, effectiveTilt, latitude);
+
+    return {
+      month: month.month,
+      ghi: Math.round(ghi * 100) / 100, // Round to 2 decimal places
+      poa: Math.round(poa * 100) / 100,
+    };
+  });
+}
