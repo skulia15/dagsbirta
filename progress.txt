@@ -1,0 +1,54 @@
+# Dagsbirta Ralph Progress Log
+
+## Completed Work
+
+### T04: Sun Position Engine ✅
+- File: src/lib/calculations/sun.ts
+- Learnings:
+  * SunCalc azimuth conversion: radians from south → degrees from north
+  * Iceland polar edge cases require isMidnightSun/isPolarNight flags
+  * Day length calculation fallback when sunrise/sunset are NaN
+- Commit: 6ff2f4b
+
+### T01-T03: Data Foundation ✅
+- Files:
+  * scripts/process-dem.ts (462 lines)
+  * src/app/api/tiles/[z]/[x]/[y]/route.ts (130 lines)
+  * src/lib/calculations/horizon.ts (440 lines)
+- Learnings:
+  * ISN2016 projection requires custom false origin (not standard)
+  * Lambert Conformal Conic math must match exactly between processor and calculator
+  * DEM tiles: 7,022 generated for zoom 8-12
+  * Horizon calculation is CPU-intensive - consider caching results
+- Commit: 783bcca
+
+### T05-T06: Shadow + Daily ✅
+- Files:
+  * src/lib/calculations/shadow.ts (95 lines)
+  * src/lib/calculations/daily.ts (121 lines)
+- Learnings:
+  * Azimuth wraparound at 0/360° requires modulo arithmetic for interpolation
+  * Solar disc margin (0.25°) prevents false positives near horizon
+  * Daily calculation: 288 5-minute intervals = fine-grained visibility tracking
+  * Terrain sunrise/sunset can differ significantly from astronomical times in valleys
+- Commits: 7b621ea, 792c98e
+
+## Next: T07-T10 (Monthly, Irradiance, Solar ROI, API)
+Breaking into 30 small stories per prd.json for true iterative development
+
+### T07-1: Monthly: Create file and type imports ✅
+- File: src/lib/calculations/monthly.ts
+- Learnings:
+  * Scaffold story - minimal setup for iteration
+  * Also imported HorizonProfile (needed for T07-2 function signature)
+  * Build warnings are from tiles API, unrelated to new code
+- Commit: 751f29d
+
+### T07-2: Monthly: Implement getMonthlySunlight skeleton ✅
+- File: src/lib/calculations/monthly.ts
+- Learnings:
+  * Skeleton functions with placeholder return values enable iterative development
+  * Using 1-indexed months (1-12) for cleaner API than JavaScript's 0-11 convention
+  * MONTH_NAMES constant array allows easy index-to-name mapping
+  * Input validation (month 1-12) catches errors early
+- Commit: d7bd31e

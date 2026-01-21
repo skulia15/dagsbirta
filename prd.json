@@ -1,0 +1,223 @@
+{
+  "project": "Dagsbirta - Iceland Sunlight Analysis",
+  "completed": [
+    "T01: DEM Tile Processor",
+    "T02: DEM Tile API",
+    "T03: Horizon Calculator",
+    "T04: Sun Position Engine",
+    "T05: Shadow Intersection",
+    "T06: Daily Sunlight Calculator"
+  ],
+  "stories": [
+    {
+      "id": "T07-1",
+      "title": "Monthly: Create file and type imports",
+      "description": "Create src/lib/calculations/monthly.ts with imports: MonthlySunlight, AnnualSunlight from ../../types/index, and getDailySunlight from ./daily",
+      "passes": true,
+      "acceptance": "File exists, imports compile without errors"
+    },
+    {
+      "id": "T07-2",
+      "title": "Monthly: Implement getMonthlySunlight skeleton",
+      "description": "Function signature: getMonthlySunlight(lat, lng, horizonProfile, month, year) with basic return structure",
+      "passes": true,
+      "acceptance": "Function compiles, returns MonthlySunlight type with placeholder values"
+    },
+    {
+      "id": "T07-3",
+      "title": "Monthly: Add sample day selection",
+      "description": "Sample 4 days per month (1st, 8th, 15th, 22nd), call getDailySunlight for each",
+      "passes": false,
+      "acceptance": "Correctly generates Date objects for sample days, calls getDailySunlight 4 times"
+    },
+    {
+      "id": "T07-4",
+      "title": "Monthly: Calculate monthly averages",
+      "description": "Average the 4 sample days, calculate totalHours = averageDailyHours * daysInMonth",
+      "passes": false,
+      "acceptance": "Returns correct averageDailyHours and totalHours for a test month"
+    },
+    {
+      "id": "T07-5",
+      "title": "Monthly: Implement getAnnualSunlight",
+      "description": "Function that calls getMonthlySunlight for all 12 months and aggregates results",
+      "passes": false,
+      "acceptance": "Returns AnnualSunlight with 12 months, correct annual totals"
+    },
+    {
+      "id": "T07-6",
+      "title": "Monthly: Test and commit",
+      "description": "Test with Reykjavík location, verify June > December, npm run build succeeds, git commit",
+      "passes": false,
+      "acceptance": "Build passes, git commit exists with message 'feat: T07 - monthly aggregator'"
+    },
+    {
+      "id": "T08-1",
+      "title": "Irradiance: Create file and imports",
+      "description": "Create src/lib/calculations/irradiance.ts with type imports and constants from src/lib/constants.ts",
+      "passes": false,
+      "acceptance": "File exists with IrradianceResult type imported, compiles"
+    },
+    {
+      "id": "T08-2",
+      "title": "Irradiance: Implement GHI calculation helper",
+      "description": "Function to calculate Global Horizontal Irradiance from sunlight hours using Iceland atmospheric factors",
+      "passes": false,
+      "acceptance": "Helper function returns reasonable GHI values (700-1000 kWh/m²/year for Iceland)"
+    },
+    {
+      "id": "T08-3",
+      "title": "Irradiance: Implement POA calculation",
+      "description": "Calculate Plane of Array irradiance for tilted panels using simplified formula: POA ≈ GHI × (1 + 0.15 × sin(tilt - lat + 15°))",
+      "passes": false,
+      "acceptance": "POA calculation returns higher values than GHI for optimal tilt"
+    },
+    {
+      "id": "T08-4",
+      "title": "Irradiance: Calculate optimal tilt angle",
+      "description": "Determine optimal panel tilt for year-round production (latitude ± 5°)",
+      "passes": false,
+      "acceptance": "Returns optimal tilt ~60-65° for Iceland locations"
+    },
+    {
+      "id": "T08-5",
+      "title": "Irradiance: Implement monthly irradiance breakdown",
+      "description": "Calculate monthly GHI and POA values, accounting for seasonal variation",
+      "passes": false,
+      "acceptance": "Returns 12 months of irradiance data, summer > winter"
+    },
+    {
+      "id": "T08-6",
+      "title": "Irradiance: Main getIrradiance function",
+      "description": "Combine all helpers into main export: getIrradiance(lat, lng, annualSunlight, options?)",
+      "passes": false,
+      "acceptance": "Returns complete IrradianceResult with all fields populated"
+    },
+    {
+      "id": "T08-7",
+      "title": "Irradiance: Test and commit",
+      "description": "Test with sample data, verify realistic Iceland values, build succeeds, git commit",
+      "passes": false,
+      "acceptance": "Build passes, commit 'feat: T08 - irradiance calculator'"
+    },
+    {
+      "id": "T09-1",
+      "title": "Solar ROI: Create file and constants",
+      "description": "Create src/lib/calculations/solar-roi.ts with SOLAR_CONSTANTS from constants.ts and default configuration",
+      "passes": false,
+      "acceptance": "File exists with proper imports, default values defined"
+    },
+    {
+      "id": "T09-2",
+      "title": "Solar ROI: Calculate panel area and production",
+      "description": "Helper to calculate panelAreaM2 from systemSizeKW and annual production from POA irradiance",
+      "passes": false,
+      "acceptance": "Formulas: panelArea = systemSizeKW / efficiency, production = POA × area × efficiency × (1-losses)"
+    },
+    {
+      "id": "T09-3",
+      "title": "Solar ROI: Calculate financial metrics",
+      "description": "Compute annualSavingsEUR, paybackYears, 25-year return with degradation",
+      "passes": false,
+      "acceptance": "Realistic payback 8-15 years for Iceland, proper degradation calculation"
+    },
+    {
+      "id": "T09-4",
+      "title": "Solar ROI: Monthly production breakdown",
+      "description": "Generate monthly production estimates based on monthly irradiance",
+      "passes": false,
+      "acceptance": "Returns 12 months of kWh production, follows seasonal pattern"
+    },
+    {
+      "id": "T09-5",
+      "title": "Solar ROI: Viability assessment",
+      "description": "Determine isViable flag and viabilityRating (excellent/good/marginal/poor) based on payback years",
+      "passes": false,
+      "acceptance": "Rating logic: excellent <10y, good 10-15y, marginal 15-20y, poor >20y"
+    },
+    {
+      "id": "T09-6",
+      "title": "Solar ROI: Main getSolarROI function",
+      "description": "Combine all calculations into getSolarROI(irradianceResult, options?)",
+      "passes": false,
+      "acceptance": "Returns complete SolarROIResult with all fields"
+    },
+    {
+      "id": "T09-7",
+      "title": "Solar ROI: Test and commit",
+      "description": "Test 5kW system produces 3500-4500 kWh/year, build succeeds, git commit",
+      "passes": false,
+      "acceptance": "Build passes, commit 'feat: T09 - solar panel ROI calculator'"
+    },
+    {
+      "id": "T10-1",
+      "title": "API: Create route file and imports",
+      "description": "Create src/app/api/analyze/route.ts with Next.js App Router structure, import all calculation functions",
+      "passes": false,
+      "acceptance": "File structure correct, all calculation modules imported"
+    },
+    {
+      "id": "T10-2",
+      "title": "API: Request validation",
+      "description": "Validate request body: lat/lng within Iceland bounds (ICELAND_BOUNDS), date is valid ISO string",
+      "passes": false,
+      "acceptance": "Returns 400 for invalid coordinates, 404 for non-Iceland locations"
+    },
+    {
+      "id": "T10-3",
+      "title": "API: Orchestrate horizon calculation",
+      "description": "Call getHorizonProfile with request coordinates, handle errors",
+      "passes": false,
+      "acceptance": "Successfully computes horizon profile for valid Iceland coordinates"
+    },
+    {
+      "id": "T10-4",
+      "title": "API: Orchestrate sun path and daily sunlight",
+      "description": "Call getSunPath and getDailySunlight with horizon profile",
+      "passes": false,
+      "acceptance": "Returns daily sunlight data for requested date"
+    },
+    {
+      "id": "T10-5",
+      "title": "API: Add monthly/annual calculations",
+      "description": "If includeAnnual flag set, call getAnnualSunlight and getIrradiance",
+      "passes": false,
+      "acceptance": "Conditional execution based on request parameters"
+    },
+    {
+      "id": "T10-6",
+      "title": "API: Add solar ROI calculations",
+      "description": "If includeSolarROI flag set, call getSolarROI with system size from request",
+      "passes": false,
+      "acceptance": "Returns solar ROI data when requested"
+    },
+    {
+      "id": "T10-7",
+      "title": "API: Implement tier logic",
+      "description": "Free tier: today only, 10° horizon resolution, no annual/ROI. Paid: full access",
+      "passes": false,
+      "acceptance": "Returns partial data for free tier, full for paid"
+    },
+    {
+      "id": "T10-8",
+      "title": "API: Add response metadata",
+      "description": "Track processing time, add calculatedAt timestamp, tier indication",
+      "passes": false,
+      "acceptance": "Response includes meta object with timing and tier info"
+    },
+    {
+      "id": "T10-9",
+      "title": "API: Error handling and testing",
+      "description": "Proper error responses, test with curl/Postman, verify response format",
+      "passes": false,
+      "acceptance": "Returns proper HTTP codes, JSON format correct"
+    },
+    {
+      "id": "T10-10",
+      "title": "API: Build verification and commit",
+      "description": "npm run build succeeds, start dev server and test endpoint, git commit",
+      "passes": false,
+      "acceptance": "Build passes, endpoint responds correctly, commit 'feat: T10 - analysis API endpoint'"
+    }
+  ]
+}
