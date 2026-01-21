@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# DEM data (large files)
+data/dem/raw/*.tif
+data/dem/tiles/**/*.png
+
+# Ralph logs
+ralph-*.log
