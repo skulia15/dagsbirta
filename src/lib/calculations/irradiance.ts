@@ -80,6 +80,43 @@ export function calculateGHI(annualSunlight: AnnualSunlight): number {
 }
 
 /**
+ * Calculate Plane of Array (POA) irradiance for a tilted panel.
+ *
+ * POA represents the solar radiation received on a tilted surface,
+ * which is typically higher than GHI when the panel is optimally tilted
+ * toward the sun.
+ *
+ * Uses simplified formula: POA ≈ GHI × (1 + 0.15 × sin(tilt - lat + 15°))
+ *
+ * This approximation captures:
+ * - The gain from tilting panels toward the sun
+ * - The latitude-dependent optimal angle
+ * - The +15° offset for year-round optimization (slightly steeper than lat)
+ *
+ * @param ghi - Global Horizontal Irradiance in kWh/m²
+ * @param tiltAngle - Panel tilt angle in degrees from horizontal
+ * @param latitude - Location latitude in degrees
+ * @returns POA irradiance in kWh/m²
+ */
+export function calculatePOA(
+  ghi: number,
+  tiltAngle: number,
+  latitude: number
+): number {
+  // Convert degrees to radians for Math.sin
+  const angleRad = ((tiltAngle - latitude + 15) * Math.PI) / 180;
+
+  // POA ≈ GHI × (1 + 0.15 × sin(tilt - lat + 15°))
+  // This simplified formula works well for year-round optimization
+  const tiltGain = 1 + 0.15 * Math.sin(angleRad);
+
+  // Ensure we never return less than GHI (can happen at extreme angles)
+  const poa = ghi * Math.max(1, tiltGain);
+
+  return poa;
+}
+
+/**
  * Calculate monthly GHI values based on monthly sunlight data.
  *
  * Accounts for seasonal variation in sun angle and daylight hours.

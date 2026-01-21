@@ -69,7 +69,7 @@
       "id": "T08-3",
       "title": "Irradiance: Implement POA calculation",
       "description": "Calculate Plane of Array irradiance for tilted panels using simplified formula: POA ≈ GHI × (1 + 0.15 × sin(tilt - lat + 15°))",
-      "passes": false,
+      "passes": true,
       "acceptance": "POA calculation returns higher values than GHI for optimal tilt"
     },
     {
