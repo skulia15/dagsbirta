@@ -146,7 +146,7 @@
       "id": "T09-7",
       "title": "Solar ROI: Test and commit",
       "description": "Test 5kW system produces 3500-4500 kWh/year, build succeeds, git commit",
-      "passes": false,
+      "passes": true,
       "acceptance": "Build passes, commit 'feat: T09 - solar panel ROI calculator'"
     },
     {
