@@ -62,7 +62,7 @@
       "id": "T08-2",
       "title": "Irradiance: Implement GHI calculation helper",
       "description": "Function to calculate Global Horizontal Irradiance from sunlight hours using Iceland atmospheric factors",
-      "passes": false,
+      "passes": true,
       "acceptance": "Helper function returns reasonable GHI values (700-1000 kWh/m²/year for Iceland)"
     },
     {
