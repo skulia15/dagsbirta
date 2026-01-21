@@ -90,7 +90,7 @@
       "id": "T08-6",
       "title": "Irradiance: Main getIrradiance function",
       "description": "Combine all helpers into main export: getIrradiance(lat, lng, annualSunlight, options?)",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns complete IrradianceResult with all fields populated"
     },
     {

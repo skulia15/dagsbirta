@@ -141,3 +141,15 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Test results: June GHI=189.76 vs December GHI=7.88 (24x ratio!) - summer >> winter confirmed
   * Annual totals: GHI=964.5, POA=995.1 kWh/m² (reasonable for Iceland)
   * Values rounded to 2 decimal places for clean output
+
+### T08-6: Irradiance: Main getIrradiance function ✅
+- File: src/lib/calculations/irradiance.ts
+- Learnings:
+  * Main function pattern: orchestrate existing helpers into a single entry point
+  * Created IrradianceOptions interface for optional tilt angle override
+  * Function accepts lat, lng, annualSunlight, and optional options parameter
+  * lng parameter reserved for future use (e.g., longitude-based solar azimuth adjustments)
+  * Returns complete IrradianceResult with annualGHI, annualPOA, optimalTiltAngle, monthlyIrradiance
+  * All values rounded to 2 decimal places for consistent output
+  * Build warnings from tiles API are unrelated - irradiance module compiles cleanly
+- Commit: cbf6819

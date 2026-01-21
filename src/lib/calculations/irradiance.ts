@@ -241,3 +241,71 @@ export function calculateMonthlyIrradiance(
     };
   });
 }
+
+/**
+ * Options for the getIrradiance function.
+ */
+export interface IrradianceOptions {
+  /**
+   * Custom tilt angle for panels in degrees from horizontal.
+   * If not provided, the optimal tilt angle for the latitude will be calculated.
+   */
+  tiltAngle?: number;
+}
+
+/**
+ * Main irradiance calculation function.
+ *
+ * Combines all irradiance calculation helpers to produce a complete
+ * IrradianceResult for a given location. This is the primary export
+ * for the irradiance module and should be used by API endpoints.
+ *
+ * The function:
+ * 1. Calculates the optimal panel tilt angle for the location
+ * 2. Computes annual Global Horizontal Irradiance (GHI)
+ * 3. Computes annual Plane of Array (POA) irradiance for the tilt angle
+ * 4. Generates monthly breakdown of both GHI and POA
+ *
+ * @param lat - Location latitude in degrees
+ * @param lng - Location longitude in degrees (currently unused, reserved for future use)
+ * @param annualSunlight - Annual sunlight data from getAnnualSunlight()
+ * @param options - Optional configuration (e.g., custom tilt angle)
+ * @returns Complete IrradianceResult with all fields populated
+ *
+ * @example
+ * ```typescript
+ * const annualSunlight = await getAnnualSunlight(lat, lng, horizon, 2024);
+ * const irradiance = getIrradiance(lat, lng, annualSunlight);
+ * console.log(`Annual POA: ${irradiance.annualPOA} kWh/m²`);
+ * ```
+ */
+export function getIrradiance(
+  lat: number,
+  lng: number,
+  annualSunlight: AnnualSunlight,
+  options?: IrradianceOptions
+): IrradianceResult {
+  // Step 1: Calculate optimal tilt angle (or use provided override)
+  const optimalTiltAngle = options?.tiltAngle ?? calculateOptimalTilt(lat);
+
+  // Step 2: Calculate annual GHI from sunlight data
+  const annualGHI = calculateGHI(annualSunlight);
+
+  // Step 3: Calculate annual POA using the tilt angle
+  const annualPOA = calculatePOA(annualGHI, optimalTiltAngle, lat);
+
+  // Step 4: Calculate monthly breakdown
+  const monthlyIrradiance = calculateMonthlyIrradiance(
+    annualSunlight,
+    lat,
+    optimalTiltAngle
+  );
+
+  // Return complete IrradianceResult
+  return {
+    annualGHI: Math.round(annualGHI * 100) / 100,
+    annualPOA: Math.round(annualPOA * 100) / 100,
+    optimalTiltAngle,
+    monthlyIrradiance,
+  };
+}
