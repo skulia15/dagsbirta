@@ -34,7 +34,7 @@
       "id": "T17-5",
       "title": "Sun Path: Mark sunrise, noon, sunset",
       "description": "Add markers (circles or icons) at sunrise, solar noon, and sunset positions with labels",
-      "passes": false,
+      "passes": true,
       "acceptance": "Three distinct markers visible on sun path with time labels"
     },
     {

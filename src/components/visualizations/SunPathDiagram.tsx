@@ -5,9 +5,10 @@
  * T17-2: Polar coordinate system with altitude circles and cardinal directions
  * T17-3: polarToCartesian helper for sun position coordinate conversion
  * T17-4: Sun path arc drawing using sunPath.positions data
+ * T17-5: Markers for sunrise, solar noon, and sunset with time labels
  */
 
-import type { SunPath } from '../../types/index';
+import type { SunPath, SunPosition } from '../../types/index';
 
 export interface SunPathDiagramProps {
   sunPath?: SunPath;
@@ -210,6 +211,150 @@ function SunPathArc({ sunPath }: { sunPath: SunPath }) {
   );
 }
 
+/**
+ * Finds the sun position closest to a given target time
+ * Returns null if positions array is empty or target is null
+ */
+function findPositionAtTime(
+  positions: SunPosition[],
+  targetTime: Date | null
+): SunPosition | null {
+  if (!targetTime || positions.length === 0) {
+    return null;
+  }
+
+  const targetMs = targetTime.getTime();
+  let closest: SunPosition | null = null;
+  let minDiff = Infinity;
+
+  for (const pos of positions) {
+    const diff = Math.abs(pos.date.getTime() - targetMs);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = pos;
+    }
+  }
+
+  return closest;
+}
+
+/**
+ * Formats a Date object to a time string (HH:MM)
+ */
+function formatTime(date: Date | null): string {
+  if (!date) return '';
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+/**
+ * Individual sun marker with label
+ */
+function SunMarker({
+  position,
+  label,
+  time,
+  color,
+}: {
+  position: SunPosition;
+  label: string;
+  time: string;
+  color: string;
+}) {
+  const { x, y } = polarToCartesian(position.azimuth, position.altitude);
+
+  // Calculate label position offset based on azimuth to avoid overlapping the path
+  // Place labels slightly outside the marker
+  const labelOffset = 18;
+  const labelRadians = ((position.azimuth - 90) * Math.PI) / 180;
+  const labelX = x + labelOffset * Math.cos(labelRadians);
+  const labelY = y + labelOffset * Math.sin(labelRadians);
+
+  return (
+    <g className={`sun-marker sun-marker-${label.toLowerCase().replace(' ', '-')}`}>
+      {/* Marker circle with white outline for visibility */}
+      <circle cx={x} cy={y} r={8} fill="white" stroke={color} strokeWidth={2} />
+      <circle cx={x} cy={y} r={5} fill={color} />
+
+      {/* Label with time */}
+      <text
+        x={labelX}
+        y={labelY}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize={11}
+        fontWeight="bold"
+        fill="#333"
+      >
+        {label}
+      </text>
+      <text
+        x={labelX}
+        y={labelY + 12}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize={10}
+        fill="#666"
+      >
+        {time}
+      </text>
+    </g>
+  );
+}
+
+/**
+ * Renders markers at sunrise, solar noon, and sunset positions
+ * T17-5: Add markers at key sun positions with time labels
+ */
+function SunMarkers({ sunPath }: { sunPath: SunPath }) {
+  const markers: Array<{
+    position: SunPosition | null;
+    label: string;
+    time: Date | null;
+    color: string;
+  }> = [
+    {
+      position: findPositionAtTime(sunPath.positions, sunPath.sunrise),
+      label: 'Sunrise',
+      time: sunPath.sunrise,
+      color: '#FF6B6B', // Warm red/orange for sunrise
+    },
+    {
+      position: findPositionAtTime(sunPath.positions, sunPath.solarNoon),
+      label: 'Noon',
+      time: sunPath.solarNoon,
+      color: '#FFD93D', // Bright yellow for noon
+    },
+    {
+      position: findPositionAtTime(sunPath.positions, sunPath.sunset),
+      label: 'Sunset',
+      time: sunPath.sunset,
+      color: '#C9190B', // Deep red/orange for sunset
+    },
+  ];
+
+  return (
+    <g className="sun-markers">
+      {markers.map(({ position, label, time, color }) => {
+        // Only render markers for positions above the horizon
+        if (!position || position.altitude <= 0) {
+          return null;
+        }
+        return (
+          <SunMarker
+            key={label}
+            position={position}
+            label={label}
+            time={formatTime(time)}
+            color={color}
+          />
+        );
+      })}
+    </g>
+  );
+}
+
 export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
   return (
     <svg
@@ -226,6 +371,9 @@ export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
 
       {/* Sun path arc - T17-4 */}
       {sunPath && <SunPathArc sunPath={sunPath} />}
+
+      {/* Sunrise, noon, sunset markers - T17-5 */}
+      {sunPath && <SunMarkers sunPath={sunPath} />}
 
       {/* Center point marker (zenith) */}
       <circle cx={CENTER} cy={CENTER} r={3} fill="#666" />
