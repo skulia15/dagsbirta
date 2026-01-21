@@ -188,7 +188,7 @@
       "id": "T10-6",
       "title": "API: Add solar ROI calculations",
       "description": "If includeSolarROI flag set, call getSolarROI with system size from request",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns solar ROI data when requested"
     },
     {

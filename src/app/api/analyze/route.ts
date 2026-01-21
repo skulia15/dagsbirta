@@ -296,7 +296,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Build response (further processing in T10-6 through T10-9)
+  // T10-6: Add solar ROI calculations if includeSolarROI flag is set
+  // Note: Solar ROI requires irradiance data, which requires includeAnnual to be true
+  let solarROI: SolarROIResult | undefined;
+
+  if (validatedRequest.includeSolarROI && irradiance) {
+    solarROI = getSolarROI(irradiance, {
+      systemSizeKW: validatedRequest.systemSizeKW,
+    });
+  }
+
+  // Build response (further processing in T10-7 through T10-9)
   const response: AnalyzeResponse = {
     location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
     horizonProfile,
@@ -304,6 +314,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     dailySunlight,
     annualSunlight,
     irradiance,
+    solarROI,
     meta: {
       calculatedAt: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,

@@ -303,3 +303,13 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * Response includes both `annualSunlight` (monthly breakdown) and `irradiance` (GHI/POA calculations)
   * TypeScript handles undefined fields correctly - they're omitted from JSON response when undefined
   * Build warnings from tiles API are unrelated to route changes
+
+### T10-6: API: Add solar ROI calculations ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * Solar ROI is conditional on `includeSolarROI` flag AND `irradiance` being present
+  * Dependency chain: includeSolarROI requires irradiance, which requires includeAnnual
+  * `systemSizeKW` already parsed in validatedRequest with default 5kW (line 222-223)
+  * Pattern: declare `solarROI: SolarROIResult | undefined`, assign conditionally
+  * TypeScript handles undefined fields correctly - omitted from JSON response when undefined
+  * getSolarROI accepts options object with systemSizeKW for customization
