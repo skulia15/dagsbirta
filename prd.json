@@ -118,7 +118,7 @@
       "id": "T09-3",
       "title": "Solar ROI: Calculate financial metrics",
       "description": "Compute annualSavingsEUR, paybackYears, 25-year return with degradation",
-      "passes": false,
+      "passes": true,
       "acceptance": "Realistic payback 8-15 years for Iceland, proper degradation calculation"
     },
     {

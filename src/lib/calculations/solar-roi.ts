@@ -183,3 +183,182 @@ export function calculateAnnualProduction(
   // Round to 2 decimal places for clean output
   return Math.round(production * 100) / 100;
 }
+
+/**
+ * Calculate annual savings from solar production.
+ *
+ * Formula: annualSavings = annualProductionKWh × electricityPriceEUR
+ *
+ * This assumes all produced electricity offsets grid consumption at retail price.
+ * In practice, savings may vary based on net metering policies and self-consumption rates.
+ *
+ * @param annualProductionKWh - Annual energy production in kWh
+ * @param electricityPriceEUR - Electricity price in EUR per kWh
+ * @returns Annual savings in EUR
+ *
+ * @example
+ * // 4000 kWh/year at 0.18 EUR/kWh
+ * calculateAnnualSavings(4000, 0.18) // returns 720 EUR
+ */
+export function calculateAnnualSavings(
+  annualProductionKWh: number,
+  electricityPriceEUR: number = DEFAULT_SOLAR_CONFIG.electricityPriceEUR
+): number {
+  if (annualProductionKWh < 0) {
+    throw new Error('Annual production cannot be negative');
+  }
+  if (electricityPriceEUR <= 0) {
+    throw new Error('Electricity price must be positive');
+  }
+
+  const savings = annualProductionKWh * electricityPriceEUR;
+
+  // Round to 2 decimal places
+  return Math.round(savings * 100) / 100;
+}
+
+/**
+ * Calculate payback period in years.
+ *
+ * Formula: paybackYears = totalInstallationCost / annualSavingsEUR
+ *
+ * This is a simple payback calculation that doesn't account for:
+ * - Time value of money (discount rate)
+ * - Electricity price inflation
+ * - Panel degradation (addressed in calculate25YearReturn)
+ *
+ * For Iceland with 5kW system:
+ * - Cost: 5 × 1500 = 7500 EUR
+ * - Production: ~4000 kWh/year
+ * - Savings: 4000 × 0.18 = 720 EUR/year
+ * - Payback: 7500 / 720 = 10.4 years
+ *
+ * @param totalInstallationCostEUR - Total system cost in EUR
+ * @param annualSavingsEUR - Annual electricity savings in EUR
+ * @returns Payback period in years
+ *
+ * @example
+ * calculatePaybackYears(7500, 720) // returns 10.42 years
+ */
+export function calculatePaybackYears(
+  totalInstallationCostEUR: number,
+  annualSavingsEUR: number
+): number {
+  if (totalInstallationCostEUR < 0) {
+    throw new Error('Installation cost cannot be negative');
+  }
+  if (annualSavingsEUR <= 0) {
+    throw new Error('Annual savings must be positive');
+  }
+
+  const payback = totalInstallationCostEUR / annualSavingsEUR;
+
+  // Round to 2 decimal places
+  return Math.round(payback * 100) / 100;
+}
+
+/**
+ * Calculate total installation cost.
+ *
+ * @param systemSizeKW - System size in kilowatts
+ * @param installCostPerKW - Installation cost per kW in EUR
+ * @returns Total installation cost in EUR
+ */
+export function calculateInstallationCost(
+  systemSizeKW: number,
+  installCostPerKW: number = DEFAULT_SOLAR_CONFIG.installCostPerKW
+): number {
+  if (systemSizeKW <= 0) {
+    throw new Error('System size must be positive');
+  }
+  if (installCostPerKW <= 0) {
+    throw new Error('Installation cost per kW must be positive');
+  }
+
+  return systemSizeKW * installCostPerKW;
+}
+
+/**
+ * Calculate 25-year (or custom lifetime) return with annual degradation.
+ *
+ * Solar panels degrade over time, losing efficiency each year. Typical degradation
+ * is 0.5% per year, meaning after 25 years panels produce about 88% of original.
+ *
+ * Formula: For each year n (0 to lifetime-1):
+ *   yearProduction = year1Production × (1 - degradation)^n
+ *   yearSavings = yearProduction × electricityPrice
+ *   totalReturn = sum of all yearSavings
+ *
+ * The degradation follows exponential decay:
+ * - Year 1: 100%
+ * - Year 10: 95.5%
+ * - Year 25: 88.2%
+ *
+ * @param year1ProductionKWh - First year production in kWh (before degradation)
+ * @param electricityPriceEUR - Electricity price in EUR per kWh
+ * @param annualDegradation - Annual degradation rate (0-1), e.g., 0.005 for 0.5%
+ * @param systemLifeYears - System lifetime in years (default: 25)
+ * @returns Object with totalSavingsEUR, totalProductionKWh, finalYearProductionPercent
+ *
+ * @example
+ * // 4000 kWh first year, 0.18 EUR/kWh, 0.5% degradation, 25 years
+ * calculate25YearReturn(4000, 0.18, 0.005, 25)
+ * // Total production: ~92,800 kWh (not 100,000 due to degradation)
+ * // Total savings: ~16,700 EUR
+ */
+export function calculate25YearReturn(
+  year1ProductionKWh: number,
+  electricityPriceEUR: number = DEFAULT_SOLAR_CONFIG.electricityPriceEUR,
+  annualDegradation: number = DEFAULT_SOLAR_CONFIG.annualDegradation,
+  systemLifeYears: number = DEFAULT_SOLAR_CONFIG.systemLifeYears
+): {
+  totalSavingsEUR: number;
+  totalProductionKWh: number;
+  finalYearProductionPercent: number;
+  yearlyBreakdown: Array<{ year: number; productionKWh: number; savingsEUR: number }>;
+} {
+  if (year1ProductionKWh < 0) {
+    throw new Error('Year 1 production cannot be negative');
+  }
+  if (electricityPriceEUR <= 0) {
+    throw new Error('Electricity price must be positive');
+  }
+  if (annualDegradation < 0 || annualDegradation >= 1) {
+    throw new Error('Annual degradation must be between 0 and 1 (exclusive)');
+  }
+  if (systemLifeYears <= 0) {
+    throw new Error('System life must be positive');
+  }
+
+  let totalProductionKWh = 0;
+  let totalSavingsEUR = 0;
+  const yearlyBreakdown: Array<{ year: number; productionKWh: number; savingsEUR: number }> = [];
+
+  for (let year = 1; year <= systemLifeYears; year++) {
+    // Production degrades each year: year1 × (1 - degradation)^(year-1)
+    // Year 1 is 100%, Year 2 is 99.5%, etc.
+    const degradationFactor = Math.pow(1 - annualDegradation, year - 1);
+    const yearProductionKWh = year1ProductionKWh * degradationFactor;
+    const yearSavingsEUR = yearProductionKWh * electricityPriceEUR;
+
+    totalProductionKWh += yearProductionKWh;
+    totalSavingsEUR += yearSavingsEUR;
+
+    yearlyBreakdown.push({
+      year,
+      productionKWh: Math.round(yearProductionKWh * 100) / 100,
+      savingsEUR: Math.round(yearSavingsEUR * 100) / 100,
+    });
+  }
+
+  // Final year production as percentage of year 1
+  const finalYearProductionPercent =
+    Math.round(Math.pow(1 - annualDegradation, systemLifeYears - 1) * 10000) / 100;
+
+  return {
+    totalSavingsEUR: Math.round(totalSavingsEUR * 100) / 100,
+    totalProductionKWh: Math.round(totalProductionKWh * 100) / 100,
+    finalYearProductionPercent,
+    yearlyBreakdown,
+  };
+}
