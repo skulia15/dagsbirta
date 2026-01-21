@@ -237,3 +237,37 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Test results: 5kW system → 4085 kWh/year, 10.2 year payback, 130.94% ROI, "good" rating
   * All 11 fields of SolarROIResult populated and verified
   * Custom options work correctly (10kW test produces exactly 2x energy)
+
+### T09-7: Solar ROI: Test and commit ✅
+- File: src/lib/calculations/solar-roi.ts (T09 feature complete)
+- Learnings:
+  * Acceptance criteria "5kW produces 3500-4500 kWh/year" requires specifying POA range
+  * Iceland typical POA: 850-1000 kWh/m²/year → production: 3655-4300 kWh/year (in range)
+  * Production formula: POA × 25m² × 0.20 × 0.86 = POA × 4.3
+  * Lower bound POA=814 gives 3500 kWh, upper bound POA=1047 gives 4500 kWh
+  * Reykjavík validated (POA=995) produces 4278 kWh/year - well within target
+  * T09 feature complete - Solar ROI calculator ready for API integration
+- Commit: 78bc5e7
+
+## Next: T10 (Analysis API Endpoint)
+Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
+
+### T10-1: API: Create route file and imports ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * Next.js App Router uses route.ts files with exported HTTP method handlers
+  * All calculation modules imported for future orchestration
+  * Created AnalyzeRequest and AnalyzeResponse interfaces for type safety
+  * CORS headers added for cross-origin API access
+- Commit: (previous iteration)
+
+### T10-2: API: Request validation ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * 400 for invalid data types/missing fields (malformed request)
+  * 404 for valid coords outside Iceland (resource not found semantic)
+  * `isValidNumber()` helper uses `Number.isFinite()` to reject NaN, Infinity
+  * `validateCoordinates()` checks types first, then range (-90/90 lat, -180/180 lng)
+  * `isWithinIceland()` uses ICELAND_BOUNDS: lat 63.3-66.5, lng -24.5 to -13.5
+  * `validateDateString()` uses Date.parse() to validate ISO format
+  * TypeScript `unknown` type + type guards ensure runtime safety matches types

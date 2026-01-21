@@ -153,14 +153,14 @@
       "id": "T10-1",
       "title": "API: Create route file and imports",
       "description": "Create src/app/api/analyze/route.ts with Next.js App Router structure, import all calculation functions",
-      "passes": false,
+      "passes": true,
       "acceptance": "File structure correct, all calculation modules imported"
     },
     {
       "id": "T10-2",
       "title": "API: Request validation",
       "description": "Validate request body: lat/lng within Iceland bounds (ICELAND_BOUNDS), date is valid ISO string",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns 400 for invalid coordinates, 404 for non-Iceland locations"
     },
     {
