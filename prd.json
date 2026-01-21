@@ -216,7 +216,7 @@
       "id": "T10-10",
       "title": "API: Build verification and commit",
       "description": "npm run build succeeds, start dev server and test endpoint, git commit",
-      "passes": false,
+      "passes": true,
       "acceptance": "Build passes, endpoint responds correctly, commit 'feat: T10 - analysis API endpoint'"
     }
   ]

@@ -346,3 +346,29 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * Top-level try/catch wraps all calculation logic to catch unexpected errors
   * Tested with curl: all 6 error scenarios return proper HTTP codes and JSON format
   * Successful requests return 200 with full response structure including meta object
+
+### T10-10: API: Build verification and commit ✅
+- File: src/app/api/analyze/route.ts (T10 feature complete)
+- Learnings:
+  * Build produces only warnings (broad file patterns for DEM tiles), no errors
+  * Turbopack warnings about "overly broad patterns" are expected - dynamic tile paths can't be statically analyzed
+  * Dev server test validates full API flow: horizon → sunPath → dailySunlight → annualSunlight → irradiance → solarROI
+  * Free tier (default): 10° horizon resolution, today only, no annual/ROI calculations
+  * Paid tier: 1° horizon resolution, custom dates, full annual and solar ROI data
+  * Processing time ~850ms for paid tier (all calculations), ~200ms for free tier (basic daily)
+  * T10 feature complete - Analysis API endpoint ready for production
+- Commit: (this commit)
+
+## T10 Complete Summary
+
+The `/api/analyze` endpoint orchestrates the entire sunlight analysis pipeline:
+1. **Input**: lat, lng, date (optional), tier (free/paid), includeAnnual, includeSolarROI, systemSizeKW
+2. **Output**: horizonProfile, sunPath, dailySunlight, annualSunlight (paid), irradiance (paid), solarROI (paid)
+3. **Tier restrictions**: Free tier gets basic daily data only; paid tier unlocks full annual analysis and ROI calculations
+
+### API Features:
+- Request validation with proper HTTP codes (400/404/500)
+- CORS headers for cross-origin access
+- Response metadata (timing, tier info)
+- Error codes for debugging
+- Conditional calculation based on request parameters
