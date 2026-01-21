@@ -181,7 +181,7 @@
       "id": "T10-5",
       "title": "API: Add monthly/annual calculations",
       "description": "If includeAnnual flag set, call getAnnualSunlight and getIrradiance",
-      "passes": false,
+      "passes": true,
       "acceptance": "Conditional execution based on request parameters"
     },
     {

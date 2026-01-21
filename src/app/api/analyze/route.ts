@@ -272,12 +272,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     horizonProfile
   );
 
-  // Build response (further processing in T10-5 through T10-9)
+  // T10-5: Add monthly/annual calculations if includeAnnual flag is set
+  let annualSunlight: AnnualSunlight | undefined;
+  let irradiance: IrradianceResult | undefined;
+
+  if (validatedRequest.includeAnnual) {
+    // Get the year from the analysis date
+    const year = analysisDate.getFullYear();
+
+    // Calculate annual sunlight (aggregates monthly data)
+    annualSunlight = getAnnualSunlight(
+      validatedRequest.lat,
+      validatedRequest.lng,
+      horizonProfile,
+      year
+    );
+
+    // Calculate irradiance from annual sunlight data
+    irradiance = getIrradiance(
+      validatedRequest.lat,
+      validatedRequest.lng,
+      annualSunlight
+    );
+  }
+
+  // Build response (further processing in T10-6 through T10-9)
   const response: AnalyzeResponse = {
     location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
     horizonProfile,
     sunPath,
     dailySunlight,
+    annualSunlight,
+    irradiance,
     meta: {
       calculatedAt: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,

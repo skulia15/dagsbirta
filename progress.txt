@@ -292,3 +292,14 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * Test results: Reykjavík summer (Jun 21) = 20.25h sunlight with 4.2% terrain reduction
   * Test results: Reykjavík winter (Dec 21) = 3.33h sunlight - confirms seasonal variation works
   * 288 intervals (5-minute samples across 24h) provides granular visibility data
+
+### T10-5: API: Add monthly/annual calculations ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * `includeAnnual` flag already parsed in validatedRequest (line 220-221)
+  * Conditional execution pattern: declare variables as `type | undefined`, assign conditionally
+  * Cascading dependency: `getIrradiance()` requires `annualSunlight` output from `getAnnualSunlight()`
+  * Year extracted from analysisDate: `analysisDate.getFullYear()` ensures consistent year across calculations
+  * Response includes both `annualSunlight` (monthly breakdown) and `irradiance` (GHI/POA calculations)
+  * TypeScript handles undefined fields correctly - they're omitted from JSON response when undefined
+  * Build warnings from tiles API are unrelated to route changes
