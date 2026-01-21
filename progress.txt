@@ -69,3 +69,11 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Averaging both totalHours and theoreticalHours enables accurate reductionPercent
   * Tested: Reykjavík June ~20h/day (600h total), December ~4h/day (117h total) - realistic
   * Higher reductionPercent in winter (16%) vs summer (3.5%) due to lower sun angles
+
+### T07-5: Monthly: Implement getAnnualSunlight ✅
+- File: src/lib/calculations/monthly.ts
+- Learnings:
+  * Leap year formula: `(year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)`
+  * Annual averageDailyHours = totalHours / daysInYear (365 or 366)
+  * Reduction aggregation: calculate from totals, not average of monthly percentages
+  * Function iterates all 12 months via simple for loop (1 to 12)

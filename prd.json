@@ -41,7 +41,7 @@
       "id": "T07-5",
       "title": "Monthly: Implement getAnnualSunlight",
       "description": "Function that calls getMonthlySunlight for all 12 months and aggregates results",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns AnnualSunlight with 12 months, correct annual totals"
     },
     {
