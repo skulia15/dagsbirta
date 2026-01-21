@@ -41,7 +41,7 @@
       "id": "T17-6",
       "title": "Sun Path: Overlay horizon profile",
       "description": "Draw filled area from center showing terrain horizon using HorizonProfile data",
-      "passes": false,
+      "passes": true,
       "acceptance": "Gray/brown filled area represents terrain blocking, varies by azimuth"
     },
     {

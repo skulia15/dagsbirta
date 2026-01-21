@@ -6,12 +6,14 @@
  * T17-3: polarToCartesian helper for sun position coordinate conversion
  * T17-4: Sun path arc drawing using sunPath.positions data
  * T17-5: Markers for sunrise, solar noon, and sunset with time labels
+ * T17-6: Horizon profile overlay showing terrain blocking
  */
 
-import type { SunPath, SunPosition } from '../../types/index';
+import type { HorizonProfile, SunPath, SunPosition } from '../../types/index';
 
 export interface SunPathDiagramProps {
   sunPath?: SunPath;
+  horizonProfile?: HorizonProfile;
 }
 
 const SVG_SIZE = 500;
@@ -157,6 +159,88 @@ function CardinalLabels() {
           </text>
         );
       })}
+    </g>
+  );
+}
+
+/**
+ * Renders the horizon profile as a filled area from center outward
+ * T17-6: Overlay terrain horizon showing blocked sky
+ *
+ * The filled area represents terrain that blocks the view of the sky.
+ * It extends from the center (zenith) to the horizon elevation angle at each azimuth.
+ *
+ * @param horizonProfile - The terrain horizon data containing profile array
+ */
+function HorizonOverlay({ horizonProfile }: { horizonProfile: HorizonProfile }) {
+  const { profile } = horizonProfile;
+
+  // Need profile data to render
+  if (!profile || profile.length === 0) {
+    return null;
+  }
+
+  // Sort profile by azimuth to ensure proper path order
+  const sortedProfile = [...profile].sort((a, b) => a.azimuth - b.azimuth);
+
+  // Build SVG path for the filled horizon area
+  // The path goes around the diagram at the horizon elevation for each azimuth,
+  // then closes back through the outer edge (0° altitude = full horizon)
+  const pathParts: string[] = [];
+
+  // First, draw the inner edge (at terrain horizon elevations)
+  sortedProfile.forEach((point, index) => {
+    // Use the elevation angle as the altitude (terrain blocks up to this angle)
+    const { x, y } = polarToCartesian(point.azimuth, point.elevationAngle);
+    if (index === 0) {
+      pathParts.push(`M ${x} ${y}`);
+    } else {
+      pathParts.push(`L ${x} ${y}`);
+    }
+  });
+
+  // Close the inner loop by connecting back to the first point
+  if (sortedProfile.length > 0) {
+    const first = sortedProfile[0];
+    const { x, y } = polarToCartesian(first.azimuth, first.elevationAngle);
+    pathParts.push(`L ${x} ${y}`);
+  }
+
+  // Now draw the outer edge (at 0° altitude, the horizon circle) in reverse
+  // This creates a "donut" shape where the terrain fills between the horizon and the elevation
+  // We go around the full circle at RADIUS to close the fill properly
+  const outerPathParts: string[] = [];
+
+  // Trace the outer edge (0° altitude = RADIUS from center) in reverse order
+  [...sortedProfile].reverse().forEach((point, index) => {
+    const { x, y } = polarToCartesian(point.azimuth, 0);
+    if (index === 0) {
+      outerPathParts.push(`L ${x} ${y}`);
+    } else {
+      outerPathParts.push(`L ${x} ${y}`);
+    }
+  });
+
+  // Complete the outer loop
+  if (sortedProfile.length > 0) {
+    const last = sortedProfile[sortedProfile.length - 1];
+    const { x: lastX, y: lastY } = polarToCartesian(last.azimuth, last.elevationAngle);
+    outerPathParts.push(`L ${lastX} ${lastY}`);
+  }
+
+  const pathData = [...pathParts, ...outerPathParts, 'Z'].join(' ');
+
+  return (
+    <g className="horizon-overlay">
+      {/* Terrain fill - gray/brown color representing blocked terrain */}
+      <path
+        d={pathData}
+        fill="#8B7355"
+        fillOpacity={0.4}
+        stroke="#6B5344"
+        strokeWidth={1}
+        strokeOpacity={0.6}
+      />
     </g>
   );
 }
@@ -355,7 +439,7 @@ function SunMarkers({ sunPath }: { sunPath: SunPath }) {
   );
 }
 
-export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
+export function SunPathDiagram({ sunPath, horizonProfile }: SunPathDiagramProps) {
   return (
     <svg
       width={SVG_SIZE}
@@ -368,6 +452,9 @@ export function SunPathDiagram({ sunPath }: SunPathDiagramProps) {
       <AltitudeCircles />
       <CardinalLines />
       <CardinalLabels />
+
+      {/* Horizon profile overlay - T17-6: shows terrain blocking */}
+      {horizonProfile && <HorizonOverlay horizonProfile={horizonProfile} />}
 
       {/* Sun path arc - T17-4 */}
       {sunPath && <SunPathArc sunPath={sunPath} />}
