@@ -139,7 +139,7 @@
       "id": "T09-6",
       "title": "Solar ROI: Main getSolarROI function",
       "description": "Combine all calculations into getSolarROI(irradianceResult, options?)",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns complete SolarROIResult with all fields"
     },
     {

@@ -414,6 +414,95 @@ export function assessViability(paybackYears: number): {
   };
 }
 
+/**
+ * Main function to calculate solar panel ROI from irradiance data.
+ *
+ * This is the primary entry point for solar ROI calculations. It combines
+ * all helper functions to produce a complete SolarROIResult:
+ * - Panel area calculation from system size
+ * - Annual and monthly production from POA irradiance
+ * - Financial metrics: savings, payback, 25-year return
+ * - Viability assessment based on payback period
+ *
+ * @param irradianceResult - Result from getIrradiance() containing POA data
+ * @param options - Optional configuration overrides
+ * @returns Complete SolarROIResult with all fields populated
+ *
+ * @example
+ * const irradiance = getIrradiance(lat, lng, annualSunlight);
+ * const roi = getSolarROI(irradiance, { systemSizeKW: 5 });
+ * console.log(`Payback: ${roi.paybackYears} years`);
+ * console.log(`Rating: ${roi.viabilityRating}`);
+ */
+export function getSolarROI(
+  irradianceResult: IrradianceResult,
+  options?: SolarROIOptions
+): SolarROIResult {
+  // Merge options with defaults
+  const config = {
+    systemSizeKW: options?.systemSizeKW ?? DEFAULT_SOLAR_CONFIG.systemSizeKW,
+    panelEfficiency: options?.panelEfficiency ?? DEFAULT_SOLAR_CONFIG.panelEfficiency,
+    systemLosses: options?.systemLosses ?? DEFAULT_SOLAR_CONFIG.systemLosses,
+    electricityPriceEUR: options?.electricityPriceEUR ?? DEFAULT_SOLAR_CONFIG.electricityPriceEUR,
+    installCostPerKW: options?.installCostPerKW ?? DEFAULT_SOLAR_CONFIG.installCostPerKW,
+    annualDegradation: options?.annualDegradation ?? DEFAULT_SOLAR_CONFIG.annualDegradation,
+    systemLifeYears: options?.systemLifeYears ?? DEFAULT_SOLAR_CONFIG.systemLifeYears,
+  };
+
+  // Step 1: Calculate panel area from system size
+  const panelAreaM2 = calculatePanelArea(config.systemSizeKW, config.panelEfficiency);
+
+  // Step 2: Calculate annual production from POA irradiance
+  const annualProductionKWh = calculateAnnualProduction(
+    irradianceResult.annualPOA,
+    panelAreaM2,
+    config.panelEfficiency,
+    config.systemLosses
+  );
+
+  // Step 3: Calculate monthly production breakdown
+  const monthlyProduction = calculateMonthlyProduction(
+    irradianceResult.monthlyIrradiance,
+    panelAreaM2,
+    config.panelEfficiency,
+    config.systemLosses
+  );
+
+  // Step 4: Calculate financial metrics
+  const installCostEUR = calculateInstallationCost(config.systemSizeKW, config.installCostPerKW);
+  const annualSavingsEUR = calculateAnnualSavings(annualProductionKWh, config.electricityPriceEUR);
+  const paybackYears = calculatePaybackYears(installCostEUR, annualSavingsEUR);
+
+  // Step 5: Calculate 25-year return with degradation
+  const lifetimeReturn = calculate25YearReturn(
+    annualProductionKWh,
+    config.electricityPriceEUR,
+    config.annualDegradation,
+    config.systemLifeYears
+  );
+
+  // Calculate ROI percentage: (total savings - cost) / cost * 100
+  const roiPercent =
+    Math.round(((lifetimeReturn.totalSavingsEUR - installCostEUR) / installCostEUR) * 10000) / 100;
+
+  // Step 6: Assess viability based on payback period
+  const { isViable, viabilityRating } = assessViability(paybackYears);
+
+  return {
+    systemSizeKW: config.systemSizeKW,
+    panelAreaM2: Math.round(panelAreaM2 * 100) / 100,
+    annualProductionKWh,
+    monthlyProduction,
+    annualSavingsEUR,
+    installCostEUR,
+    paybackYears,
+    return25Year: lifetimeReturn.totalSavingsEUR,
+    roiPercent,
+    isViable,
+    viabilityRating,
+  };
+}
+
 export function calculate25YearReturn(
   year1ProductionKWh: number,
   electricityPriceEUR: number = DEFAULT_SOLAR_CONFIG.electricityPriceEUR,

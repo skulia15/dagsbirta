@@ -214,3 +214,26 @@ Breaking into 30 small stories per prd.json for true iterative development
   * Total annual from monthly sum: 4492 kWh for 5kW system (within expected 3500-4500 range)
   * Function returns `Array<{ month: number; kWh: number }>` matching SolarROIResult.monthlyProduction type
 - Commit: 52fd579
+
+### T09-5: Solar ROI: Viability assessment ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * `assessViability()` function takes paybackYears and returns {isViable, viabilityRating}
+  * Rating boundaries use < comparisons: excellent <10y, good <15y, marginal <20y, poor >=20y
+  * isViable is derived from viabilityRating (not separate logic) - true for non-poor ratings
+  * 20-year threshold for "poor" aligns with typical 25-year panel warranty period
+  * Function uses VIABILITY_THRESHOLDS constants already defined in T09-1
+  * Input validation: throws on negative payback years
+- Commit: ec01a8a
+
+### T09-6: Solar ROI: Main getSolarROI function ✅
+- File: src/lib/calculations/solar-roi.ts
+- Learnings:
+  * `getSolarROI()` is the facade pattern - single entry point for all ROI calculations
+  * Function signature: `getSolarROI(irradianceResult: IrradianceResult, options?: SolarROIOptions)`
+  * Uses nullish coalescing (??) to merge options with DEFAULT_SOLAR_CONFIG
+  * Orchestrates 6 steps: panel area → annual production → monthly production → financials → 25-year return → viability
+  * ROI percentage formula: ((totalSavings - cost) / cost) × 100
+  * Test results: 5kW system → 4085 kWh/year, 10.2 year payback, 130.94% ROI, "good" rating
+  * All 11 fields of SolarROIResult populated and verified
+  * Custom options work correctly (10kW test produces exactly 2x energy)
