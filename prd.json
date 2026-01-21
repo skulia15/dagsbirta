@@ -48,7 +48,7 @@
       "id": "T07-6",
       "title": "Monthly: Test and commit",
       "description": "Test with Reykjavík location, verify June > December, npm run build succeeds, git commit",
-      "passes": false,
+      "passes": true,
       "acceptance": "Build passes, git commit exists with message 'feat: T07 - monthly aggregator'"
     },
     {
