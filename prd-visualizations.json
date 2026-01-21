@@ -20,7 +20,7 @@
       "id": "T17-3",
       "title": "Sun Path: Implement coordinate conversion",
       "description": "Helper function polarToCartesian(azimuth, altitude) converts sun position to SVG x,y coordinates",
-      "passes": false,
+      "passes": true,
       "acceptance": "Function correctly maps: azimuth 0°=top, 90°=right, altitude 0°=edge, 90°=center"
     },
     {
