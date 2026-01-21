@@ -1,0 +1,174 @@
+{
+  "project": "Dagsbirta - Frontend Visualizations",
+  "phase": "Visualizations (T17-T19)",
+  "stories": [
+    {
+      "id": "T17-1",
+      "title": "Sun Path: Create component file and basic SVG structure",
+      "description": "Create src/components/visualizations/SunPathDiagram.tsx with TypeScript, import SunPath type, create basic SVG canvas (500x500) with viewBox",
+      "passes": true,
+      "acceptance": "Component renders empty SVG, imports compile, build passes"
+    },
+    {
+      "id": "T17-2",
+      "title": "Sun Path: Add polar coordinate system",
+      "description": "Draw concentric circles for altitude (0°, 30°, 60°, 90°) and radial lines for cardinal directions (N, E, S, W)",
+      "passes": false,
+      "acceptance": "Circular diagram with grid, labeled cardinal directions"
+    },
+    {
+      "id": "T17-3",
+      "title": "Sun Path: Implement coordinate conversion",
+      "description": "Helper function polarToCartesian(azimuth, altitude) converts sun position to SVG x,y coordinates",
+      "passes": false,
+      "acceptance": "Function correctly maps: azimuth 0°=top, 90°=right, altitude 0°=edge, 90°=center"
+    },
+    {
+      "id": "T17-4",
+      "title": "Sun Path: Draw sun path arc",
+      "description": "Plot sun's trajectory through the day as an SVG path using sunPath.positions data",
+      "passes": false,
+      "acceptance": "Yellow/orange arc shows sun movement, updates with prop changes"
+    },
+    {
+      "id": "T17-5",
+      "title": "Sun Path: Mark sunrise, noon, sunset",
+      "description": "Add markers (circles or icons) at sunrise, solar noon, and sunset positions with labels",
+      "passes": false,
+      "acceptance": "Three distinct markers visible on sun path with time labels"
+    },
+    {
+      "id": "T17-6",
+      "title": "Sun Path: Overlay horizon profile",
+      "description": "Draw filled area from center showing terrain horizon using HorizonProfile data",
+      "passes": false,
+      "acceptance": "Gray/brown filled area represents terrain blocking, varies by azimuth"
+    },
+    {
+      "id": "T17-7",
+      "title": "Sun Path: Highlight visible vs shadowed",
+      "description": "Color-code sun path segments: bright where sun is visible, gray where blocked by terrain",
+      "passes": false,
+      "acceptance": "Path changes color where it crosses horizon line"
+    },
+    {
+      "id": "T17-8",
+      "title": "Sun Path: Add current position indicator",
+      "description": "Animated dot or icon showing current sun position, moves with time slider prop",
+      "passes": false,
+      "acceptance": "Indicator updates smoothly when currentTime prop changes"
+    },
+    {
+      "id": "T17-9",
+      "title": "Sun Path: Test and commit",
+      "description": "Test with sample data (Reykjavík summer/winter), verify responsive, build passes, git commit",
+      "passes": false,
+      "acceptance": "Component works with real data, commit 'feat: T17 - sun path diagram'"
+    },
+    {
+      "id": "T18-1",
+      "title": "Horizon: Create component and SVG canvas",
+      "description": "Create src/components/visualizations/HorizonChart.tsx with SVG (width: 100%, height: 200px)",
+      "passes": false,
+      "acceptance": "Component renders, imports HorizonProfile type, build passes"
+    },
+    {
+      "id": "T18-2",
+      "title": "Horizon: Add axes (azimuth 0-360, elevation 0-45)",
+      "description": "X-axis: azimuth 0-360° with N/E/S/W labels. Y-axis: elevation angle 0-45° with degree labels",
+      "passes": false,
+      "acceptance": "Axes render correctly, cardinal directions marked on X-axis"
+    },
+    {
+      "id": "T18-3",
+      "title": "Horizon: Plot horizon profile line",
+      "description": "Draw line chart showing elevation angle across all azimuths using horizonProfile.profile data",
+      "passes": false,
+      "acceptance": "Line follows terrain profile, smooth interpolation between points"
+    },
+    {
+      "id": "T18-4",
+      "title": "Horizon: Add fill gradient below horizon",
+      "description": "Fill area below horizon line with gradient (dark at bottom, lighter at top) representing terrain",
+      "passes": false,
+      "acceptance": "Filled area makes horizon profile visually distinct"
+    },
+    {
+      "id": "T18-5",
+      "title": "Horizon: Add 0° reference line",
+      "description": "Dashed horizontal line at 0° elevation showing flat horizon reference",
+      "passes": false,
+      "acceptance": "Dashed line visible, labeled 'Flat horizon'"
+    },
+    {
+      "id": "T18-6",
+      "title": "Horizon: Mark current sun position",
+      "description": "Sun icon or marker at current azimuth/altitude, moves with time slider prop",
+      "passes": false,
+      "acceptance": "Sun marker updates position when sunPosition prop changes"
+    },
+    {
+      "id": "T18-7",
+      "title": "Horizon: Test and commit",
+      "description": "Test with Reykjavík data (Esja mountain ~15-20° to north), responsive width, build passes, commit",
+      "passes": false,
+      "acceptance": "Chart shows realistic terrain, commit 'feat: T18 - horizon profile chart'"
+    },
+    {
+      "id": "T19-1",
+      "title": "Monthly: Create component and container",
+      "description": "Create src/components/visualizations/MonthlyChart.tsx, set up Recharts BarChart with responsive container",
+      "passes": false,
+      "acceptance": "Component renders empty chart, Recharts imported, build passes"
+    },
+    {
+      "id": "T19-2",
+      "title": "Monthly: Configure chart axes and layout",
+      "description": "Y-axis: month names (Jan-Dec), X-axis: hours (0-800), horizontal bars layout",
+      "passes": false,
+      "acceptance": "12 month labels on Y-axis, hour scale on X-axis"
+    },
+    {
+      "id": "T19-3",
+      "title": "Monthly: Add sunlight hours bars",
+      "description": "Bar for each month showing totalHours from MonthlySunlight data, color: yellow/gold",
+      "passes": false,
+      "acceptance": "12 bars render, values match input data, June > December"
+    },
+    {
+      "id": "T19-4",
+      "title": "Monthly: Add theoretical hours overlay",
+      "description": "Stacked or overlaid bars showing theoreticalHours (lighter color) vs actualHours",
+      "passes": false,
+      "acceptance": "Visual distinction between theoretical (light) and actual (bright) sunlight"
+    },
+    {
+      "id": "T19-5",
+      "title": "Monthly: Highlight terrain reduction",
+      "description": "Show lost hours (theoreticalHours - totalHours) as gray segment or annotation",
+      "passes": false,
+      "acceptance": "Terrain shadow loss visible for each month"
+    },
+    {
+      "id": "T19-6",
+      "title": "Monthly: Add tooltip with details",
+      "description": "Hover tooltip shows: month name, totalHours, theoreticalHours, reductionPercent",
+      "passes": false,
+      "acceptance": "Tooltip appears on hover, shows all metrics with proper formatting"
+    },
+    {
+      "id": "T19-7",
+      "title": "Monthly: Add annual total summary",
+      "description": "Text below chart: 'Annual Total: X,XXX hours (Y% terrain reduction)'",
+      "passes": false,
+      "acceptance": "Summary calculates total from all months, formats numbers correctly"
+    },
+    {
+      "id": "T19-8",
+      "title": "Monthly: Responsive and test",
+      "description": "Make responsive (scales to container width), test with Reykjavík data, build passes, commit",
+      "passes": false,
+      "acceptance": "Works on mobile/desktop, commit 'feat: T19 - monthly sunlight chart'"
+    }
+  ]
+}
