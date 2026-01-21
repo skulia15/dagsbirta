@@ -18,6 +18,12 @@ const MONTH_NAMES = [
 ];
 
 /**
+ * Sample days to use for monthly estimation.
+ * Spaced roughly every 7 days to capture sun position changes throughout the month.
+ */
+const SAMPLE_DAYS = [1, 8, 15, 22];
+
+/**
  * Calculate sunlight statistics for a single month.
  *
  * @param lat - Latitude in decimal degrees
@@ -42,7 +48,16 @@ export function getMonthlySunlight(
   // Get month name (month is 1-indexed, array is 0-indexed)
   const monthName = MONTH_NAMES[month - 1];
 
-  // Placeholder values - actual calculation will be implemented in T07-3 and T07-4
+  // Sample 4 days per month (1st, 8th, 15th, 22nd) to estimate monthly sunlight
+  // JavaScript Date months are 0-indexed, so subtract 1 from our 1-indexed month
+  const sampleDates = SAMPLE_DAYS.map(day => new Date(year, month - 1, day));
+
+  // Calculate daily sunlight for each sample day
+  const dailyResults = sampleDates.map(date =>
+    getDailySunlight(lat, lng, date, horizonProfile)
+  );
+
+  // Placeholder values - averaging will be implemented in T07-4
   return {
     month,
     monthName,

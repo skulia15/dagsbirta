@@ -27,7 +27,7 @@
       "id": "T07-3",
       "title": "Monthly: Add sample day selection",
       "description": "Sample 4 days per month (1st, 8th, 15th, 22nd), call getDailySunlight for each",
-      "passes": false,
+      "passes": true,
       "acceptance": "Correctly generates Date objects for sample days, calls getDailySunlight 4 times"
     },
     {
