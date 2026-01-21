@@ -251,10 +251,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Build response (further processing in T10-4 through T10-9)
+  // T10-4: Calculate sun path and daily sunlight
+  // Parse date from request (defaults to today)
+  const analysisDate = validatedRequest.date
+    ? new Date(validatedRequest.date)
+    : new Date();
+
+  // Get sun path for the day
+  const sunPath = getSunPath(
+    validatedRequest.lat,
+    validatedRequest.lng,
+    analysisDate
+  );
+
+  // Calculate daily sunlight accounting for terrain
+  const dailySunlight = getDailySunlight(
+    validatedRequest.lat,
+    validatedRequest.lng,
+    analysisDate,
+    horizonProfile
+  );
+
+  // Build response (further processing in T10-5 through T10-9)
   const response: AnalyzeResponse = {
     location: { lat: validatedRequest.lat, lng: validatedRequest.lng },
     horizonProfile,
+    sunPath,
+    dailySunlight,
     meta: {
       calculatedAt: new Date().toISOString(),
       processingTimeMs: Date.now() - startTime,

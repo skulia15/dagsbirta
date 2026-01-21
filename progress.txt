@@ -271,3 +271,24 @@ Will create src/app/api/analyze/route.ts to orchestrate all calculation modules
   * `isWithinIceland()` uses ICELAND_BOUNDS: lat 63.3-66.5, lng -24.5 to -13.5
   * `validateDateString()` uses Date.parse() to validate ISO format
   * TypeScript `unknown` type + type guards ensure runtime safety matches types
+
+### T10-3: API: Orchestrate horizon calculation ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * `getHorizonProfile()` is async - needs await, can throw errors from file system access
+  * Error handling pattern: try/catch with 500 status and error details in response body
+  * Pre-emptive tier logic: angularResolution 10° for free tier, 1° for paid (anticipates T10-7)
+  * HorizonProfile returned in response body, includes location + profile array + computedAt
+  * Response now includes horizonProfile field (builds incrementally toward full analysis)
+- Commit: 50255b6
+
+### T10-4: API: Orchestrate sun path and daily sunlight ✅
+- File: src/app/api/analyze/route.ts
+- Learnings:
+  * `getSunPath()` and `getDailySunlight()` are both synchronous functions (no await needed)
+  * `getDailySunlight()` internally calls `getSunPath()`, but we expose both in the response for different use cases
+  * Date parsing: use `new Date(validatedRequest.date)` if provided, else `new Date()` for today
+  * Response builds incrementally: horizonProfile → sunPath → dailySunlight
+  * Test results: Reykjavík summer (Jun 21) = 20.25h sunlight with 4.2% terrain reduction
+  * Test results: Reykjavík winter (Dec 21) = 3.33h sunlight - confirms seasonal variation works
+  * 288 intervals (5-minute samples across 24h) provides granular visibility data

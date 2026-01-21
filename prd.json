@@ -174,7 +174,7 @@
       "id": "T10-4",
       "title": "API: Orchestrate sun path and daily sunlight",
       "description": "Call getSunPath and getDailySunlight with horizon profile",
-      "passes": false,
+      "passes": true,
       "acceptance": "Returns daily sunlight data for requested date"
     },
     {
