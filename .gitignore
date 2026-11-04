@@ -44,5 +44,8 @@ next-env.d.ts
 data/dem/raw/*.tif
 data/dem/tiles/**/*.png
 
+# On-demand building tile cache (src/lib/terrain/buildings.ts)
+data/buildings/
+
 # Ralph logs
 ralph-*.log

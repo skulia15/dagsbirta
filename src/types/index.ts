@@ -6,6 +6,8 @@ export interface HorizonPoint {
   elevationAngle: number; // degrees above horizontal
   distance: number;       // km to horizon point
   peakElevation: number;  // absolute elevation of blocking terrain
+  /** What blocks the sky in this direction (obstruction profiles only) */
+  source?: 'terrain' | 'building';
 }
 
 export interface HorizonProfile {

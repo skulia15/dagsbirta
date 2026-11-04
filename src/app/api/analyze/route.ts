@@ -15,6 +15,10 @@
  *   - includeSolarROI?: boolean (include solar panel ROI calculations)
  *   - systemSizeKW?: number (solar system size for ROI, default 5kW)
  *   - tier?: 'free' | 'paid' (access tier, defaults to 'free')
+ *   - includeBuildings?: boolean (shade from buildings as well as terrain, default true)
+ *   - surface?: 'auto' | 'roof' | 'ground' (where the spot sits; auto = roof if a
+ *     building is at the point, default 'auto')
+ *   - heightAboveSurface?: number (m above that surface, default 1.5)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -40,6 +44,8 @@ import { getDailySunlight } from '@/lib/calculations/daily';
 import { getMonthlySunlight, getAnnualSunlight } from '@/lib/calculations/monthly';
 import { getIrradiance } from '@/lib/calculations/irradiance';
 import { getSolarROI } from '@/lib/calculations/solar-roi';
+import { coarsenProfile } from '@/lib/shadow/obstruction';
+import { getSpotObstruction, type SurfaceChoice } from '@/lib/shadow/spot-obstruction';
 
 // Request body interface
 interface AnalyzeRequest {
@@ -50,6 +56,9 @@ interface AnalyzeRequest {
   includeSolarROI?: boolean;
   systemSizeKW?: number;
   tier?: 'free' | 'paid';
+  includeBuildings?: boolean;
+  surface?: SurfaceChoice;
+  heightAboveSurface?: number;
 }
 
 // Response interface
@@ -65,6 +74,13 @@ interface AnalyzeResponse {
     calculatedAt: string;
     processingTimeMs: number;
     tier: 'free' | 'paid';
+    /** How the horizon was obtained: terrain only, or terrain + buildings at a spot */
+    obstruction: {
+      includesBuildings: boolean;
+      surface?: 'ground' | 'roof' | 'wall';
+      spotElevation?: number;
+      warnings: string[];
+    };
     tierRestrictions?: {
       dateOverridden: boolean;
       annualDisabled: boolean;
@@ -265,6 +281,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   }
 
+  const surfaceParam = requestBody.surface;
+  if (
+    surfaceParam !== undefined &&
+    surfaceParam !== 'auto' &&
+    surfaceParam !== 'roof' &&
+    surfaceParam !== 'ground'
+  ) {
+    return createErrorResponse(
+      "surface must be 'auto', 'roof' or 'ground'",
+      'INVALID_SURFACE',
+      400
+    );
+  }
+  if (
+    requestBody.heightAboveSurface !== undefined &&
+    (!isValidNumber(requestBody.heightAboveSurface) ||
+      requestBody.heightAboveSurface < 0 ||
+      requestBody.heightAboveSurface > 100)
+  ) {
+    return createErrorResponse(
+      'heightAboveSurface must be a number between 0 and 100',
+      'INVALID_HEIGHT',
+      400
+    );
+  }
+
   // Parse validated request
   const validatedRequest: AnalyzeRequest = {
     lat,
@@ -275,6 +317,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     systemSizeKW:
       typeof requestBody.systemSizeKW === 'number' ? requestBody.systemSizeKW : 5,
     tier: requestBody.tier === 'paid' ? 'paid' : 'free',
+    includeBuildings: requestBody.includeBuildings !== false,
+    surface: (surfaceParam as SurfaceChoice | undefined) ?? 'auto',
+    heightAboveSurface:
+      typeof requestBody.heightAboveSurface === 'number' ? requestBody.heightAboveSurface : 1.5,
   };
 
   // Determine tier (default to 'free')
@@ -298,27 +344,48 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Wrap calculations in try/catch for unexpected errors
   try {
-    // T10-3: Calculate horizon profile
-    let horizonProfile: HorizonProfile;
-    try {
-      horizonProfile = await getHorizonProfile(
-        validatedRequest.lat,
-        validatedRequest.lng,
-        {
-          // For free tier, use lower resolution (10° instead of 1°)
-          // Full resolution will be implemented in T10-7 (tier logic)
-          angularResolution: tier === 'free' ? 10 : 1,
-        }
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      return createErrorResponse(
-        'Failed to compute horizon profile',
-        'HORIZON_CALCULATION_ERROR',
-        500,
-        errorMessage
-      );
+    // T10-3: Horizon profile. With buildings (default): the obstruction profile from
+    // the same terrain + building scene as the 3D explorer. Falls back to terrain only.
+    const angularResolution = tier === 'free' ? 10 : 1;
+    const obstruction: AnalyzeResponse['meta']['obstruction'] = {
+      includesBuildings: false,
+      warnings: [],
+    };
+    let horizonProfile: HorizonProfile | undefined;
+    if (validatedRequest.includeBuildings) {
+      try {
+        const spot = await getSpotObstruction(validatedRequest.lat, validatedRequest.lng, {
+          surface: validatedRequest.surface,
+          heightAboveSurface: validatedRequest.heightAboveSurface,
+        });
+        horizonProfile =
+          angularResolution > 1
+            ? coarsenProfile(spot.horizonProfile, angularResolution)
+            : spot.horizonProfile;
+        obstruction.includesBuildings = true;
+        obstruction.surface = spot.surface;
+        obstruction.spotElevation = spot.elevation;
+        obstruction.warnings.push(...spot.warnings);
+      } catch (error) {
+        obstruction.warnings.push(
+          `Buildings unavailable, using terrain only: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+    if (!horizonProfile) {
+      try {
+        horizonProfile = await getHorizonProfile(validatedRequest.lat, validatedRequest.lng, {
+          angularResolution,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return createErrorResponse(
+          'Failed to compute horizon profile',
+          'HORIZON_CALCULATION_ERROR',
+          500,
+          errorMessage
+        );
+      }
     }
 
     // T10-4: Calculate sun path and daily sunlight
@@ -397,6 +464,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         calculatedAt: new Date().toISOString(),
         processingTimeMs: Date.now() - startTime,
         tier,
+        obstruction,
         tierRestrictions,
       },
     };
