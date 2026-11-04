@@ -1,0 +1,566 @@
+{
+  "source": "WFS LMI_vektor:islandsdem_footprint, https://gis.lmi.is/geoserver/wfs (ÍslandsDEM v1.0, CC BY 4.0)",
+  "crs": "EPSG:3057",
+  "tiles": [
+    {
+      "nr": "00",
+      "xmin": 240000,
+      "ymin": 630000,
+      "xmax": 290000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_00.tif"
+    },
+    {
+      "nr": "01",
+      "xmin": 290000,
+      "ymin": 630000,
+      "xmax": 340000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_01.tif"
+    },
+    {
+      "nr": "02",
+      "xmin": 340000,
+      "ymin": 630000,
+      "xmax": 390000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_02.tif"
+    },
+    {
+      "nr": "05",
+      "xmin": 490000,
+      "ymin": 630000,
+      "xmax": 540000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_05.tif"
+    },
+    {
+      "nr": "06",
+      "xmin": 540000,
+      "ymin": 630000,
+      "xmax": 590000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_06.tif"
+    },
+    {
+      "nr": "07",
+      "xmin": 590000,
+      "ymin": 630000,
+      "xmax": 640000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_07.tif"
+    },
+    {
+      "nr": "08",
+      "xmin": 640000,
+      "ymin": 630000,
+      "xmax": 690000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_08.tif"
+    },
+    {
+      "nr": "09",
+      "xmin": 690000,
+      "ymin": 630000,
+      "xmax": 740000,
+      "ymax": 680000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_09.tif"
+    },
+    {
+      "nr": "11",
+      "xmin": 240000,
+      "ymin": 580000,
+      "xmax": 290000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_11.tif"
+    },
+    {
+      "nr": "12",
+      "xmin": 290000,
+      "ymin": 580000,
+      "xmax": 340000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_12.tif"
+    },
+    {
+      "nr": "13",
+      "xmin": 340000,
+      "ymin": 580000,
+      "xmax": 390000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_13.tif"
+    },
+    {
+      "nr": "14",
+      "xmin": 390000,
+      "ymin": 580000,
+      "xmax": 440000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_14.tif"
+    },
+    {
+      "nr": "15",
+      "xmin": 440000,
+      "ymin": 580000,
+      "xmax": 490000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_15.tif"
+    },
+    {
+      "nr": "16",
+      "xmin": 490000,
+      "ymin": 580000,
+      "xmax": 540000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_16.tif"
+    },
+    {
+      "nr": "17",
+      "xmin": 540000,
+      "ymin": 580000,
+      "xmax": 590000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_17.tif"
+    },
+    {
+      "nr": "18",
+      "xmin": 590000,
+      "ymin": 580000,
+      "xmax": 640000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_18.tif"
+    },
+    {
+      "nr": "19",
+      "xmin": 640000,
+      "ymin": 580000,
+      "xmax": 690000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_19.tif"
+    },
+    {
+      "nr": "20",
+      "xmin": 690000,
+      "ymin": 580000,
+      "xmax": 740000,
+      "ymax": 630000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_20.tif"
+    },
+    {
+      "nr": "22",
+      "xmin": 240000,
+      "ymin": 530000,
+      "xmax": 290000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_22.tif"
+    },
+    {
+      "nr": "23",
+      "xmin": 290000,
+      "ymin": 530000,
+      "xmax": 340000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_23.tif"
+    },
+    {
+      "nr": "24",
+      "xmin": 340000,
+      "ymin": 530000,
+      "xmax": 390000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_24.tif"
+    },
+    {
+      "nr": "25",
+      "xmin": 390000,
+      "ymin": 530000,
+      "xmax": 440000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_25.tif"
+    },
+    {
+      "nr": "26",
+      "xmin": 440000,
+      "ymin": 530000,
+      "xmax": 490000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_26.tif"
+    },
+    {
+      "nr": "27",
+      "xmin": 490000,
+      "ymin": 530000,
+      "xmax": 540000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_27.tif"
+    },
+    {
+      "nr": "28",
+      "xmin": 540000,
+      "ymin": 530000,
+      "xmax": 590000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_28.tif"
+    },
+    {
+      "nr": "29",
+      "xmin": 590000,
+      "ymin": 530000,
+      "xmax": 640000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_29.tif"
+    },
+    {
+      "nr": "30",
+      "xmin": 640000,
+      "ymin": 530000,
+      "xmax": 690000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_30.tif"
+    },
+    {
+      "nr": "31",
+      "xmin": 690000,
+      "ymin": 530000,
+      "xmax": 740000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_31.tif"
+    },
+    {
+      "nr": "32",
+      "xmin": 740000,
+      "ymin": 530000,
+      "xmax": 760000,
+      "ymax": 580000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_32.tif"
+    },
+    {
+      "nr": "33",
+      "xmin": 240000,
+      "ymin": 480000,
+      "xmax": 290000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_33.tif"
+    },
+    {
+      "nr": "34",
+      "xmin": 290000,
+      "ymin": 480000,
+      "xmax": 340000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_34.tif"
+    },
+    {
+      "nr": "35",
+      "xmin": 340000,
+      "ymin": 480000,
+      "xmax": 390000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_35.tif"
+    },
+    {
+      "nr": "36",
+      "xmin": 390000,
+      "ymin": 480000,
+      "xmax": 440000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_36.tif"
+    },
+    {
+      "nr": "37",
+      "xmin": 440000,
+      "ymin": 480000,
+      "xmax": 490000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_37.tif"
+    },
+    {
+      "nr": "38",
+      "xmin": 490000,
+      "ymin": 480000,
+      "xmax": 540000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_38.tif"
+    },
+    {
+      "nr": "39",
+      "xmin": 540000,
+      "ymin": 480000,
+      "xmax": 590000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_39.tif"
+    },
+    {
+      "nr": "40",
+      "xmin": 590000,
+      "ymin": 480000,
+      "xmax": 640000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_40.tif"
+    },
+    {
+      "nr": "41",
+      "xmin": 640000,
+      "ymin": 480000,
+      "xmax": 690000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_41.tif"
+    },
+    {
+      "nr": "42",
+      "xmin": 690000,
+      "ymin": 480000,
+      "xmax": 740000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_42.tif"
+    },
+    {
+      "nr": "43",
+      "xmin": 740000,
+      "ymin": 480000,
+      "xmax": 760000,
+      "ymax": 530000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_43.tif"
+    },
+    {
+      "nr": "44",
+      "xmin": 240000,
+      "ymin": 430000,
+      "xmax": 290000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_44.tif"
+    },
+    {
+      "nr": "45",
+      "xmin": 290000,
+      "ymin": 430000,
+      "xmax": 340000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_45.tif"
+    },
+    {
+      "nr": "46",
+      "xmin": 340000,
+      "ymin": 430000,
+      "xmax": 390000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_46.tif"
+    },
+    {
+      "nr": "47",
+      "xmin": 390000,
+      "ymin": 430000,
+      "xmax": 440000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_47.tif"
+    },
+    {
+      "nr": "48",
+      "xmin": 440000,
+      "ymin": 430000,
+      "xmax": 490000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_48.tif"
+    },
+    {
+      "nr": "49",
+      "xmin": 490000,
+      "ymin": 430000,
+      "xmax": 540000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_49.tif"
+    },
+    {
+      "nr": "50",
+      "xmin": 540000,
+      "ymin": 430000,
+      "xmax": 590000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_50.tif"
+    },
+    {
+      "nr": "51",
+      "xmin": 590000,
+      "ymin": 430000,
+      "xmax": 640000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_51.tif"
+    },
+    {
+      "nr": "52",
+      "xmin": 640000,
+      "ymin": 430000,
+      "xmax": 690000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_52.tif"
+    },
+    {
+      "nr": "53",
+      "xmin": 690000,
+      "ymin": 430000,
+      "xmax": 740000,
+      "ymax": 480000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_53.tif"
+    },
+    {
+      "nr": "56",
+      "xmin": 290000,
+      "ymin": 380000,
+      "xmax": 340000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_56.tif"
+    },
+    {
+      "nr": "57",
+      "xmin": 340000,
+      "ymin": 380000,
+      "xmax": 390000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_57.tif"
+    },
+    {
+      "nr": "58",
+      "xmin": 390000,
+      "ymin": 380000,
+      "xmax": 440000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_58.tif"
+    },
+    {
+      "nr": "59",
+      "xmin": 440000,
+      "ymin": 380000,
+      "xmax": 490000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_59.tif"
+    },
+    {
+      "nr": "60",
+      "xmin": 490000,
+      "ymin": 380000,
+      "xmax": 540000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_60.tif"
+    },
+    {
+      "nr": "61",
+      "xmin": 540000,
+      "ymin": 380000,
+      "xmax": 590000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_61.tif"
+    },
+    {
+      "nr": "62",
+      "xmin": 590000,
+      "ymin": 380000,
+      "xmax": 640000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_62.tif"
+    },
+    {
+      "nr": "63",
+      "xmin": 640000,
+      "ymin": 380000,
+      "xmax": 690000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_63.tif"
+    },
+    {
+      "nr": "64",
+      "xmin": 690000,
+      "ymin": 380000,
+      "xmax": 740000,
+      "ymax": 430000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_64.tif"
+    },
+    {
+      "nr": "67",
+      "xmin": 290000,
+      "ymin": 330000,
+      "xmax": 340000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_67.tif"
+    },
+    {
+      "nr": "68",
+      "xmin": 340000,
+      "ymin": 330000,
+      "xmax": 390000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_68.tif"
+    },
+    {
+      "nr": "69",
+      "xmin": 390000,
+      "ymin": 330000,
+      "xmax": 440000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_69.tif"
+    },
+    {
+      "nr": "70",
+      "xmin": 440000,
+      "ymin": 330000,
+      "xmax": 490000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_70.tif"
+    },
+    {
+      "nr": "71",
+      "xmin": 490000,
+      "ymin": 330000,
+      "xmax": 540000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_71.tif"
+    },
+    {
+      "nr": "72",
+      "xmin": 540000,
+      "ymin": 330000,
+      "xmax": 590000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_72.tif"
+    },
+    {
+      "nr": "73",
+      "xmin": 590000,
+      "ymin": 330000,
+      "xmax": 640000,
+      "ymax": 380000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_73.tif"
+    },
+    {
+      "nr": "80",
+      "xmin": 390000,
+      "ymin": 310000,
+      "xmax": 440000,
+      "ymax": 330000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_80.tif"
+    },
+    {
+      "nr": "81",
+      "xmin": 440000,
+      "ymin": 310000,
+      "xmax": 490000,
+      "ymax": 330000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_81.tif"
+    },
+    {
+      "nr": "82",
+      "xmin": 490000,
+      "ymin": 310000,
+      "xmax": 540000,
+      "ymax": 330000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_82.tif"
+    },
+    {
+      "nr": "83",
+      "xmin": 540000,
+      "ymin": 310000,
+      "xmax": 590000,
+      "ymax": 330000,
+      "url": "https://gis.lmi.is/gisdata/public/IslandsDEM/v1.0/IslandsDEMv1.0_2x2m_zmasl_isn93_83.tif"
+    }
+  ]
+}

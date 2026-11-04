@@ -1,0 +1,11 @@
+{
+  "source": "ÍslandsDEM v1.0 20 m (Náttúrufræðistofnun / LMÍ, CC BY 4.0), max-pooled",
+  "crs": "EPSG:3057",
+  "x0": 240020,
+  "y0": 679960,
+  "res": 80,
+  "tile": 250,
+  "cols": 6500,
+  "rows": 4625,
+  "encoding": "brotli of row-wise delta Int16 little-endian decimetres, row-major TILE×TILE; missing tile = sea (0 m)"
+}
